@@ -1,36 +1,36 @@
 const path = require('path');
-const express = require('express');
-const app = express();
-const mongoose = require('mongoose');
+const express = require("express");
+const morgan = require("morgan");
 
-const contentRoute = require('./routes/content');
-const teamRoute = require('./routes/team');
-const userRoute = require('./routes/users');
-const User = require('./models/users');
+//const mongoose = require('mongoose');
+
+const contentRouter = require("./routes/problemRoutes");
+const teamRouter = require("./routes/teamRoutes");
+const userRouter = require("./routes/userRoutes");
+const courseRouter = require('./routes/courseRoutes');
+const quizRouter = require('./routes/quizRoutes');
+
+const app = express();
+
+// MIDDLEWARES
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 
 app.use(express.static(path.join(__dirname, "js")));
 app.use(express.json());
 
-app.use('/accountsOverview',userRoute);
-app.use('/editcontent',contentRoute);
-app.use('/editteams', teamRoute);
+app.use((req,res,next)=>{
+ // console.log(req.headers);
+  next();
+})
 
-mongoose.connect('mongodb+srv://rabehmohamed82:147258@project0.557hxjm.mongodb.net/project?retryWrites=true&w=majority')
-.then(result => {
-    User.findOne().then(user => {
-        if(!user){
-            const user = new User({
-            name : "rabeh",
-            email : "rabehmohamed82@gmail.com",
-            rank : 1,
-            streak : 15,
-            education : "bsc of cs",
-            jobTitle : "Software Eng" 
-         });   
-         user.save();
-        }
-    })
-    
-    app.listen(3000);})
-.catch(err => {console.log(err);})
-;
+// ROUTES
+app.use('/users', userRouter);
+app.use('/problems', contentRouter);
+app.use('/teams', teamRouter);
+app.use('/courses', courseRouter);
+app.use('/quizes', quizRouter);
+
+
+module.exports = app;
