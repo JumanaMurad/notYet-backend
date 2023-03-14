@@ -9,6 +9,8 @@ const teamRouter = require("./routes/teamRoutes");
 const userRouter = require("./routes/userRoutes");
 const courseRouter = require('./routes/courseRoutes');
 const quizRouter = require('./routes/quizRoutes');
+const feedbackRouter = require('./routes/feedbackRoutes');
+const contestRouter = require('./routes/contestRoutes');
 
 const app = express();
 
@@ -31,6 +33,7 @@ app.use('/problems', contentRouter);
 app.use('/teams', teamRouter);
 app.use('/courses', courseRouter);
 app.use('/quizes', quizRouter);
-
+app.use('/feedbacks', feedbackRouter);
+app.use('/contests', contestRouter);
 
 module.exports = app;

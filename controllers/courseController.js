@@ -25,7 +25,7 @@ exports.getAllCourses = async (req, res) => {
     }
   };
 
-  exports.getCourse = async (req, res) => {
+exports.getCourse = async (req, res) => {
     try {
       const course = await Course.findById(req.params.id);
   
@@ -43,14 +43,14 @@ exports.getAllCourses = async (req, res) => {
     }
   };
 
-  exports.createCourse = async (req, res) => {
+exports.createCourse = async (req, res) => {
     try {
       const newCourse = await Course.create(req.body);
   
       res.status(201).json({
         status: 'sucess',
         data: {
-          tour: newC,
+          tour: newCourse,
         },
       });
     } catch (err) {
@@ -61,7 +61,7 @@ exports.getAllCourses = async (req, res) => {
     }
   };
 
-  exports.updateCourse = async (req, res) => {
+exports.updateCourse = async (req, res) => {
     try {
       const course = await Course.findByIdAndUpdate(
         { _id: req.params.id },
@@ -82,7 +82,7 @@ exports.getAllCourses = async (req, res) => {
     }
   };
   
-  exports.deleteCourse = async (req, res) => {
+exports.deleteCourse = async (req, res) => {
     try {
       await Course.findByIdAndRemove(req.params.id);
   
