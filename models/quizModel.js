@@ -10,10 +10,21 @@ const quizSchema = mongoose.Schema({
         required: true
     },
     difficulty: {
-        type: String
+        type: String,
+        enum: [
+            easy,
+            medium,
+            hard
+           ]
     },
     language: {
-        type: String
+        type: String,
+        enum: [
+            js,
+            py,
+            cpp,
+            java
+           ]
     }
 });
 

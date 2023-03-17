@@ -2,14 +2,15 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const { type } = require('os');
 const Schema = mongoose.Schema; 
 
 const UserSchema = new Schema({
-    name: {
+   name: {
         type: String,
         required : true,
-     },
-     email : {
+   },
+   email : {
       type: String,
       required : [true,'provide your email'],
       unique : true,
@@ -44,29 +45,42 @@ const UserSchema = new Schema({
    rank : {
         type: Number, 
      },
-     streak : {
+   streak : {
         type : Number,
      },
-     education : {
+   education : {
         type : String,
      },
-     jobTitle: {
+   jobTitle: {
         type : String
      },
-     examId : {
+   examId : {
       type: Schema.Types.ObjectId,
-     // ref : 'Exam'
+      ref : 'Quiz'
      },
-     problemsId : [{
-      type: Schema.Types.ObjectId,
+   solvedProblems : [
+      {
+      type: [Schema.Types.ObjectId],
       ref : 'Problem'
-     }] ,
-     active : {
+     }
+   ],
+   active : {
       type : Boolean,
       default : true,
       select : false
-     }     
-     }  
+   },
+   contest : {
+      type: [Schema.Types.ObjectId],
+      ref: 'Contest'
+   },
+   roadMap : {
+      type: String
+   },
+   feedback: {
+      type: [Schema.Types.ObjectId],
+      ref: 'Feedback'
+   }
+   }  
 );
 
 //presave middleware runs between getting data and saving it to database

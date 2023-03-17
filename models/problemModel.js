@@ -15,12 +15,20 @@ const problemSchema = new Schema({
      category : {
         type : String,
      },
+     topic : {
+      type: String,
+     },
      hint : {
         type : [String],
      },
      difficulty: {
         type : String,
-        required : true
+        required : true,
+        enum: [
+         easy,
+         medium,
+         hard
+        ]
      }
 });
 
