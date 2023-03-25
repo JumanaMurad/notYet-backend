@@ -11,8 +11,8 @@ router
 router
     .route('/:id')
     .get(authController.protect , authController.restrictTo("admin"), contestController.createContest)
-    .get(authController.protect , authController.restrictTo("admin"), contestController.updateContest)
-    .get(authController.protect , authController.restrictTo("admin"), contestController.deleteContest);
+    .patch(authController.protect , authController.restrictTo("admin"), contestController.updateContest)
+    .delete(authController.protect , authController.restrictTo("admin"), contestController.deleteContest);
 
 
 /* router
