@@ -1,16 +1,23 @@
 const express = require('express');
-const contestController = requie('../controllers/contestController');
+const contestController = require('../controllers/contestController');
+const authController = require("../controllers/authController");
 const router = express.Router();
 
 router
     .route('/')
-    .get(contestController.getAllFeedbacks)
-    .post(contestController.createFeedback);
+    .get(authController.protect ,contestController.getAllContests)
+    .get(authController.protect ,contestController.getContest);
 
 router
     .route('/:id')
-    .get(contestController.getFeedback)
-    .patch(contestController.updateFeedback)
-    .delete(contestController.deleteFeedback);
+    .get(authController.protect , authController.restrictTo("admin"), contestController.createContest)
+    .get(authController.protect , authController.restrictTo("admin"), contestController.updateContest)
+    .get(authController.protect , authController.restrictTo("admin"), contestController.deleteContest);
+
+
+/* router
+    .route('/')
+    .get(contestController.getAllFeedbacks)
+    .post(contestController.createFeedback); */
 
 module.exports = router;
