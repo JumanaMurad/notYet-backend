@@ -11,6 +11,7 @@ const courseRouter = require('./routes/courseRoutes');
 const quizRouter = require('./routes/quizRoutes');
 const feedbackRouter = require('./routes/feedbackRoutes');
 const contestRouter = require('./routes/contestRoutes');
+const roadmapRouter = require('./routes/roadmapRoutes');
 
 const app = express();
 
@@ -35,5 +36,6 @@ app.use('/courses', courseRouter);
 app.use('/quizes', quizRouter);
 app.use('/feedbacks', feedbackRouter);
 app.use('/contests', contestRouter);
+app.use('/roadmaps', roadmapRouter);
 
 module.exports = app;
