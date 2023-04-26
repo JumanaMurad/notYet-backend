@@ -25,9 +25,9 @@ const problemSchema = new Schema({
         type : String,
         required : true,
         enum: [
-         easy,
-         medium,
-         hard
+         "easy",
+         "medium",
+         "hard"
         ]
      }
 });

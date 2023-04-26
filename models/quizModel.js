@@ -12,18 +12,18 @@ const quizSchema = mongoose.Schema({
     difficulty: {
         type: String,
         enum: [
-            easy,
-            medium,
-            hard
+            "easy",
+            "medium",
+            "hard"
            ]
     },
     language: {
         type: String,
         enum: [
-            js,
-            py,
-            cpp,
-            java
+            "js",
+            "py",
+            "cpp",
+            "java"
            ]
     }
 });
