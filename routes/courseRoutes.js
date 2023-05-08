@@ -11,7 +11,7 @@ router
 router
     .route('/:id')
     .get(authController.protect , courseController.getCourse)
-    .patch(authController.protect , courseController.updateCourse)
-    .delete(authController.protect , courseController.deleteCourse);
+    .patch(authController.protect ,  authController.restrictTo("admin"), courseController.updateCourse)
+    .delete(authController.protect ,  authController.restrictTo("admin"), courseController.deleteCourse);
 
 module.exports = router;
