@@ -42,6 +42,11 @@ const UserSchema = new Schema({
    passwordChangedAt : Date,
    passwordResetToken : String,
    passwordResetExpires : Date,
+   emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+   emailVerificationToken : String,
    rank : {
         type: Number, 
      },

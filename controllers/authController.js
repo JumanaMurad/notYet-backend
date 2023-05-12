@@ -17,10 +17,27 @@ const createSendToken = (user , statusCode , res)=>{
         data:{
           user:user }
          } );  }
+
  
 
 exports.signup = async (req,res)=>{ 
     const newUser = await User.create(req.body);
+
+    const token = crypto.randomBytes(20).toString('hex');
+
+    newUser.emailVerificationToken = token;
+
+    //await newUser.save();
+
+    // Construct the verification URL
+    const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
+
+    await sendEmail({
+        email : newUser.email,
+        subject:'verify your email',
+        message: `Please click <a href="${verificationUrl}">here</a> to verify your email address.`,
+    });
+
     createSendToken(newUser , 201 , res);
     }
 
@@ -91,7 +108,6 @@ exports.forgotPassword = async (req,res) => {
     const message = `forgot your password ?${resetURL}`;
     try {
         await sendEmail ({
-            from:'admin@gmail.com',
             email:req.body.email,
             subject :'your password reset token {valid for 10 min}',
             message,
