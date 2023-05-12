@@ -18,7 +18,8 @@ const teamSchema = new Schema({
       type: String,
    },
    teamLeader: {
-      type: String,
+      type: [Schema.Types.ObjectId],
+      ref: 'User',   
       required: true
    },
    teamMembers: {

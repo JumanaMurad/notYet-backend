@@ -1,4 +1,7 @@
 const TeamJoinRequest = require("../models/teamJoinRequestModel")
+const Team = require('../models/teamModel');
+const User = require('../models/userModel');
+const sendEmail = require('../utils/email');
 
 exports.requestToJoin = async (req, res) => {
     try {
@@ -27,6 +30,18 @@ exports.requestToJoin = async (req, res) => {
 
         // Add the user to the list of pending requests to join the team
         const joinRequest = await TeamJoinRequest.create({ user: userId, team: teamId });
+
+        // send email to team leader
+        const user = await User.findById(userId);
+        const teamLeaderEmail = team.teamLeader.email;
+        const mailOptions = {
+            from: user.email,
+            to: teamLeaderEmail,
+            subject: "New join request for your team",
+            text: `A user with email ${user.email} has sent a request to join your team ${team.teamName}. Please review their request and take appropriate action.`,
+          };
+          await sendEmail(mailOptions);
+
 
         res.status(201).json({ message: "User has requested to join the team." });
     } catch (err) {

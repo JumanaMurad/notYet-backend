@@ -91,6 +91,7 @@ exports.forgotPassword = async (req,res) => {
     const message = `forgot your password ?${resetURL}`;
     try {
         await sendEmail ({
+            from:'admin@gmail.com',
             email:req.body.email,
             subject :'your password reset token {valid for 10 min}',
             message,
