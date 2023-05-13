@@ -17,11 +17,11 @@ const createSendToken = (user , statusCode , res)=>{
         data:{
           user:user }
          } );  }
-
  
 
 exports.signup = async (req,res)=>{ 
-    const newUser = await User.create(req.body);
+    try{
+    const newUser = await User.create(req.body);  
 
     const token = crypto.randomBytes(20).toString('hex');
 
@@ -35,11 +35,28 @@ exports.signup = async (req,res)=>{
     await sendEmail({
         email : newUser.email,
         subject:'verify your email',
-        message: `Please click <a href="${verificationUrl}">here</a> to verify your email address.`,
+        message: `Please click <a href="${verificationUrl}">here</a> to verify your email address. ${token}`,
     });
-
     createSendToken(newUser , 201 , res);
+    
+    }catch(err){
+        console.error('Error signing up user:', error);
+        res.status(400).json({ status: 'error', message: 'Could not create user.' });
     }
+}
+
+exports.verifyEmail = async(req,res)=>{
+    
+    const user = await User.findOneAndUpdate(
+          { emailVerificationToken: req.query.token },
+          { emailVerified: true, emailVerificationToken: null },
+          { new: true }
+        );
+    if (!user) {
+        return res.status(400).json({ status: 'error', message: 'Invalid or expired verification token.' });
+    }
+    res.status(200).json({ status: 'success', message: 'Email verified successfully.' });
+}
 
 exports.login = async (req,res)=> {
     const {email , password} = req.body;
