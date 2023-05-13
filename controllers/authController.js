@@ -40,7 +40,7 @@ exports.signup = async (req,res)=>{
     createSendToken(newUser , 201 , res);
     
     }catch(err){
-        console.error('Error signing up user:', error);
+        console.error('Error signing up user:', err);
         res.status(400).json({ status: 'error', message: 'Could not create user.' });
     }
 }

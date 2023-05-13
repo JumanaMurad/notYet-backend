@@ -1,9 +1,10 @@
 const Problem = require('../models/problemModel');
+const AppError = require('./../utils/appError');
+const catchAsync = require('./../utils/catchAsync');
 
 exports.getAllProblems = async (req,res) => {
     try{
-        const problems = await Problem.find();
-    
+        const problems = await Problem.find();  
         res.status(200).json({
             status: 'sucess',
             results: problems.length,
@@ -17,39 +18,29 @@ exports.getAllProblems = async (req,res) => {
         }
 }
 
-exports.getProblem = async (req, res) => {
-    try{
-    const problem = await Problem.findById(req.params.id);
 
+exports.getProblem = catchAsync (async (req, res,next) => {
+    const problem = await Problem.findById(req.params.id);
+    if(!problem){
+        return next(new AppError('not found',404))
+    }
     res.status(200).json({
         status: 'sucess',
         data: {
           tour: problem,
         },
-    });
-    } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err,    
-          });
-    }
-}
+    }); 
+});
 
-exports.createProblem = async (req, res) => {
-    try{
+exports.createProblem = catchAsync(async (req, res,next) => {    
     const newProblem = await Problem.create(req.body);
-
     res.status(201).json({
         status: 'sucess',
         data:newProblem,
       });
-    } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err,    
-          });
-    }
-}
+    } 
+);
+
 exports.updateProblem = async (req, res) => {
     try{
     const newProblem = await Problem.findByIdAndUpdate(

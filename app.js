@@ -3,6 +3,8 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require('cors');
 
+const AppError = require('./utils/appError');
+const globalErorHandler = require('./controllers/errorController');
 //const mongoose = require('mongoose');
 
 const contentRouter = require("./routes/problemRoutes");
@@ -40,5 +42,10 @@ app.use('/quizes', quizRouter);
 app.use('/feedbacks', feedbackRouter);
 app.use('/contests', contestRouter);
 app.use('/roadmaps', roadmapRouter);
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl}`, 404));
+});
+
+app.use(globalErorHandler);
 
 module.exports = app;
