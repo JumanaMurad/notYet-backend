@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require("express");
 const morgan = require("morgan");
+const cors = require('cors');
 
 //const mongoose = require('mongoose');
 
@@ -26,7 +27,9 @@ app.use(express.json());
 app.use((req,res,next)=>{
  // console.log(req.headers);
   next();
-})
+});
+
+app.use(cors());
 
 // ROUTES
 app.use('/users', userRouter);
