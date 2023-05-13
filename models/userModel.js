@@ -6,9 +6,14 @@ const { type } = require('os');
 const Schema = mongoose.Schema; 
 
 const UserSchema = new Schema({
-   name: {
+   fullName: {
+      type: String,
+      required : true,
+ },
+   username: {
         type: String,
         required : true,
+        unique: true
    },
    email : {
       type: String,
@@ -63,17 +68,10 @@ const UserSchema = new Schema({
       type: Schema.Types.ObjectId,
       ref : 'Quiz'
      },
-   solvedProblems : [
-      {
+   solvedProblems :{
       type: [Schema.Types.ObjectId],
       ref : 'Problem'
-     }
-   ],
-   active : {
-      type : Boolean,
-      default : true,
-      select : false
-   },
+     },
    contest : {
       type: [Schema.Types.ObjectId],
       ref: 'Contest'
