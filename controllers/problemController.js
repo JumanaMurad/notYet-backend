@@ -73,7 +73,7 @@ exports.deleteProblem = catchAsync( async (req,res) => {
 
 exports.getSolvedProblems = catchAsync ( async(req,res)=> {    
         const user = req.user;
-        const solvedProblems = user.solvedProblems;
+        const solvedProblems = user.submittedProblems;
         res.status(200).json({
             status: 'sucess',
             data: [
