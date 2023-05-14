@@ -26,7 +26,7 @@ router
 
 router.get('/',authController.protect,userController.getUser);
 
-router.get('/allUsers',authController.protect , authController.restrictTo('admin') ,userController.getAllUsers);
+router.get('/all-users',authController.protect , authController.restrictTo('admin') ,userController.getAllUsers);
 
 router
   .route('/')
