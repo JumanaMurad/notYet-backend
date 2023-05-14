@@ -9,18 +9,20 @@ const UserSchema = new Schema({
    fullName: {
       type: String,
       required : true,
+      trim: true
  },
    username: {
         type: String,
         required : true,
-        unique: true
+        unique: true,
+        trim:true
    },
    email : {
       type: String,
       required : [true,'provide your email'],
       unique : true,
       lowercase : true,
-      validate:[validator.isEmail , 'provide a valid email ']
+      validate:[validator.isEmail , 'please, provide a valid email ']
    },
    role : {
       type : String,
@@ -58,20 +60,22 @@ const UserSchema = new Schema({
    streak : {
         type : Number,
      },
-   education : {
-        type : String,
-     },
-   jobTitle: {
-        type : String
-     },
-   examId : {
+   quizId : {
       type: Schema.Types.ObjectId,
       ref : 'Quiz'
      },
-   solvedProblems :{
-      type: [Schema.Types.ObjectId],
-      ref : 'Problem'
-     },
+   submittedProblems :[{
+      problem: {
+         type: Schema.Types.ObjectId,
+         ref: 'Problem',
+         required: true
+      },
+      status: {
+         type: String,
+         enum: ['Pending', 'Accepted', 'Wrong Answer', 'Compilation Error', 'Runtime Error', 'Time Limit Exceeded', 'Memory Limit Exceeded'],
+         default: 'Pending'
+      }
+   }],
    contest : {
       type: [Schema.Types.ObjectId],
       ref: 'Contest'
@@ -88,12 +92,14 @@ const UserSchema = new Schema({
 
 //presave middleware runs between getting data and saving it to database
 UserSchema.pre('save',async function(next){
-   if(!this.isModified('password')) return next();
-   // runs if password was modified
+
+   if(!this.isModified('password')) return next(); // runs if password was modified
    
    this.password = await bcrypt.hash(this.password , 10);  
 
    this.passwordConfirm = undefined;
+
+
 });
 
 UserSchema.pre('save', function(next){
@@ -129,6 +135,19 @@ UserSchema.methods.createPasswordResetToken = function (){
   // console.log({resetToken},this.passwordResetToken);
    return resetToken;
 }
+
+
+// Pre-save middleware
+UserSchema.pre('save', function (next) {
+
+   // Make the username all in lowercase, then remove any white space
+   this.username = this.username.toLowerCase().replace(/\s/g, '');
+
+   // Capitalize the first letter of each word in the title
+   this.fullName = this.fullName.replace(/\b\w/g, (match) => match.toUpperCase());
+   
+   next();
+ });
 
 const User = mongoose.model('User' , UserSchema);
 

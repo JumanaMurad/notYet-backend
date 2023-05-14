@@ -6,7 +6,8 @@ const problemSchema = new Schema({
      title: {
         type: String,
         required : true,
-        unique: true
+        unique: true,
+        trim: true
      },
      description : {
         type: String,
@@ -14,20 +15,19 @@ const problemSchema = new Schema({
      },
      category : {
         type : String,
+        required: true
      },
-     topic : {
-      type: String,
-     },
-     hint : {
-        type : [String],
+     rank : {
+        type : String,
+        required: true
      },
      difficulty: {
         type : String,
         required : true,
         enum: [
-         "easy",
-         "medium",
-         "hard"
+         "Easy",
+         "Medium",
+         "Hard"
         ]
      }
 });

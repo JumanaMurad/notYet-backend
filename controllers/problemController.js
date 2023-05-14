@@ -3,37 +3,41 @@ const AppError = require('./../utils/appError');
 const catchAsync = require('./../utils/catchAsync');
 
 exports.getAllProblems = async (req,res) => {
-    try{
-        const problems = await Problem.find();  
+
+        const problems = await Problem.find();
+        if(!problems){
+            return next(new AppError('not found', 404))
+        }
+
         res.status(200).json({
             status: 'sucess',
             results: problems.length,
             data: problems,
         });
-        } catch (err) {
-            res.status(404).json({
-                status: 'fail',
-                message: err,    
-              });
-        }
 }
 
 
 exports.getProblem = catchAsync (async (req, res,next) => {
+
     const problem = await Problem.findById(req.params.id);
+
     if(!problem){
         return next(new AppError('not found',404))
     }
+    
     res.status(200).json({
         status: 'sucess',
         data: {
           tour: problem,
         },
     }); 
+
 });
 
 exports.createProblem = catchAsync(async (req, res,next) => {    
+
     const newProblem = await Problem.create(req.body);
+    
     res.status(201).json({
         status: 'sucess',
         data:newProblem,
