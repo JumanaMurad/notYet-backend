@@ -2,7 +2,7 @@ const Problem = require('../models/problemModel');
 const AppError = require('./../utils/appError');
 const catchAsync = require('./../utils/catchAsync');
 
-exports.getAllProblems = async (req,res) => {
+exports.getAllProblems = catchAsync (async (req,res) => {
 
         const problems = await Problem.find();
         if(!problems){
@@ -14,7 +14,7 @@ exports.getAllProblems = async (req,res) => {
             results: problems.length,
             data: problems,
         });
-}
+})
 
 
 exports.getProblem = catchAsync (async (req, res,next) => {
@@ -45,8 +45,8 @@ exports.createProblem = catchAsync(async (req, res,next) => {
     } 
 );
 
-exports.updateProblem = async (req, res) => {
-    try{
+exports.updateProblem = catchAsync(async (req, res) => {
+    
     const newProblem = await Problem.findByIdAndUpdate(
         {_id: req.params.id},
         req.body);
@@ -57,6 +57,7 @@ exports.updateProblem = async (req, res) => {
           tour: newProblem,
         },
       });
+<<<<<<< HEAD
     } catch (err) {
         res.status(400).json({
             status: 'fail',
@@ -64,26 +65,25 @@ exports.updateProblem = async (req, res) => {
         });
     }
 }
+=======
+    } )
+>>>>>>> 54a0166e028f162b568858f0e14b3a5227ca4279
 
-exports.deleteProblem = async (req,res) => {
-    try {
+
+exports.deleteProblem = catchAsync( async (req,res) => {
+    
     await Problem.findByIdAndDelete(req.params.id);
         res.status(204).json({
             status: 'success',  
             data : null
           });
-    } catch (err){
-        res.status(404).json({
-            status:'fail',
-            message:err
-        });
-    }
-    }
+    } )
+
 
 
 exports.getSolvedProblems = catchAsync ( async(req,res)=> {    
         const user = req.user;
-        const solvedProblems = user.solvedProblems;
+        const solvedProblems = user.submittedProblems;
         res.status(200).json({
             status: 'sucess',
             data: [

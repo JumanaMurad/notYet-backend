@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const sendEmail = require('../utils/email');
+const AppError = require('./../utils/appError');
+const catchAsync = require('./../utils/catchAsync');
 
 const signToken = (id)=> {
    return jwt.sign({id:id} , process.env.JWT_SECRET ,
@@ -19,8 +21,8 @@ const createSendToken = (user , statusCode , res)=>{
          } );  }
  
 
-exports.signup = async (req,res)=>{ 
-    try{
+exports.signup = catchAsync (async (req,res)=>{ 
+    
     const newUser = await User.create(req.body);  
 
     const token = crypto.randomBytes(20).toString('hex');
@@ -39,11 +41,8 @@ exports.signup = async (req,res)=>{
     });
     createSendToken(newUser , 201 , res);
     
-    }catch(err){
-        console.error('Error signing up user:', err);
-        res.status(400).json({ status: 'error', message: 'Could not create user.' });
-    }
-}
+    
+})
 
 exports.verifyEmail = async(req,res)=>{
     
@@ -58,7 +57,7 @@ exports.verifyEmail = async(req,res)=>{
     res.status(200).json({ status: 'success', message: 'Email verified successfully.' });
 }
 
-exports.login = async (req,res)=> {
+exports.login = catchAsync (async (req,res)=> {
     const {email , password} = req.body;
     //1)check if email and password exist
     if(!email || !password){
@@ -71,7 +70,7 @@ exports.login = async (req,res)=> {
     //3)send token to client
     createSendToken(user , 200 , res);
 
-}
+})
 
 exports.protect = async (req,res,next) => {
     let token;
