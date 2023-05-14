@@ -127,3 +127,59 @@ exports.deleteMe = async (req,res) => {
     data : null
   });
 }
+
+exports.getProblemsStats = async (req, res) => {
+  try {
+    const stats = await User.aggregate([
+      { $unwind: "$submittedProblems" },
+      {
+        $match: {
+          "submittedProblems.status": "Accepted"
+        }
+      },
+      {
+        $group: {
+          _id: {
+            difficulty: "$submittedProblems.problem.difficulty"
+          },
+          totalSubmitted: { $sum: 1 },
+          solvedSubmitted: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.difficulty",
+          totalProblems: { $first: "$totalSubmitted" },
+          solvedProblems: { $sum: "$solvedSubmitted" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          difficulty: "$_id",
+          totalProblems: 1,
+          solvedProblems: 1,
+          percentageSolved: {
+            $multiply: [
+              { $divide: ["$solvedProblems", "$totalProblems"] },
+              100
+            ]
+          }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats,
+      },
+    });
+
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err,    
+  });
+  }
+}

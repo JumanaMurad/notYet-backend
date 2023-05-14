@@ -54,9 +54,6 @@ const UserSchema = new Schema({
       default: false,
     },
    emailVerificationToken : String,
-   rank : {
-        type: Number, 
-     },
    streak : {
         type : Number,
      },
@@ -86,6 +83,15 @@ const UserSchema = new Schema({
    feedback: {
       type: [Schema.Types.ObjectId],
       ref: 'Feedback'
+   },
+   about:
+   {
+      type: String,
+      
+   },
+   profilePic:
+   {
+      type: String
    }
    }  
 );

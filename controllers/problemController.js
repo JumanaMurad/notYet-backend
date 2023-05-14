@@ -57,7 +57,7 @@ exports.updateProblem = catchAsync(async (req, res) => {
           tour: newProblem,
         },
       });
-    } )
+    } );
 
 
 exports.deleteProblem = catchAsync( async (req,res) => {
