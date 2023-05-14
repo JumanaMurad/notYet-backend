@@ -57,17 +57,7 @@ exports.updateProblem = catchAsync(async (req, res) => {
           tour: newProblem,
         },
       });
-<<<<<<< HEAD
-    } catch (err) {
-        res.status(400).json({
-            status: 'fail',
-            message: err,
-        });
-    }
-}
-=======
-    } )
->>>>>>> 54a0166e028f162b568858f0e14b3a5227ca4279
+    } );
 
 
 exports.deleteProblem = catchAsync( async (req,res) => {
