@@ -5,14 +5,17 @@ const router = express.Router();
 
 
 router
-    .route('/')
+    .route('/')    
     .get(authController.protect, problemsController.getAllProblems)
     .post(authController.protect , authController.restrictTo('admin') ,problemsController.createProblem);
+
 
 router
     .route('/:id')
     .patch(authController.protect , authController.restrictTo("admin") , problemsController.updateProblem)   
     .delete(authController.protect,authController.restrictTo('admin' , 'team-leader') ,problemsController.deleteProblem);
+    
 
+router.get('/getSolvedProblems',authController.protect,problemsController.getSolvedProblems);
 
 module.exports = router;
