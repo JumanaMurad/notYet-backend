@@ -15,6 +15,10 @@ router.patch('/updateMe', authController.protect , userController.updateMe);
 router.delete('/DeleteMe', authController.protect , userController.deleteMe);
 
 router
+  .route('/:id/problems-stats')
+  .get( authController.protect, userController.getProblemsStats);
+
+router
   .route('/:id')
   .get(userController.getUser)
   .patch(authController.protect ,userController.updateUser)
