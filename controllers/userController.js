@@ -133,16 +133,24 @@ exports.getUserProblemStatistics = async (req, res) => {
   try {
     // Find the user by userId
     const user = await User.findById(req.params.id).populate('submittedProblems.problem');
-
+   
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     // Get the submitted problems with the actual Problem documents
-    const submittedProblems = user.submittedProblems.map(submittedProblem => submittedProblem.problem);
-
+    const submittedProblems = user.submittedProblems;
     const totalSubmitted = submittedProblems.length;
-    const totalAccepted = submittedProblems.filter(problem => problem?.status === 'Accepted').length;
+
+    let totalAccepted = 0;
+
+    for (let i = 0; i < totalSubmitted; i++) {
+      if (submittedProblems[i].status === 'Accepted') {
+        totalAccepted++;
+      }
+    }
+
+   // const totalAccepted = submittedProblems.filter(problem => problem?.status === 'Accepted').length;
     const solvedPercentage = (totalAccepted / totalSubmitted) * 100 || 0;
 
     console.log(submittedProblems.status);
