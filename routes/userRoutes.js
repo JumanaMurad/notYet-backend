@@ -12,27 +12,24 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 router.patch('/updateMyPassword' ,authController.protect , authController.updatePassword);
 
 router.patch('/updateMe', authController.protect , userController.updateMe);
-router.delete('/DeleteMe', authController.protect , userController.deleteMe);
+router.delete('/deleteMe', authController.protect , userController.deleteMe);
 
 
-router
-  .route('/:id/problems-stats')
-  .get( authController.protect, userController.getProblemsStats);
+router.get('/problems-stats/:id', authController.protect, userController.getUserProblemStatistics);
 
 router
   .route('/:id')
   .patch(authController.protect ,userController.updateUser)
   .delete(authController.protect,userController.deleteUser);
 
-router.get('/',authController.protect,userController.getUser);
+//router.get('/',authController.protect,userController.getUser);
 
 router.get('/all-users',authController.protect , authController.restrictTo('admin') ,userController.getAllUsers);
 
 router
   .route('/')
-  .post(authController.protect , authController.restrictTo('admin'), userController.createUser);
-
-
+  .post(authController.protect , authController.restrictTo('admin'), userController.createUser)
+  .get(authController.protect,userController.getUser);
 
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const User = require('../models/userModel');
+const Problem = require('../models/problemModel');
 
 const filterObj = (obj, ...allowedFields)=>{
   const newObj = {};
@@ -115,7 +116,7 @@ exports.updateMe = async (req,res) => {
   res.status(200).json({
     status:'success',
     data:{
-      user :updatedUser
+      user: updatedUser
   }
   });
 }
@@ -128,58 +129,30 @@ exports.deleteMe = async (req,res) => {
   });
 }
 
-exports.getProblemsStats = async (req, res) => {
+exports.getUserProblemStatistics = async (req, res) => {
   try {
-    const stats = await User.aggregate([
-      { $unwind: "$submittedProblems" },
-      {
-        $match: {
-          "submittedProblems.status": "Accepted"
-        }
-      },
-      {
-        $group: {
-          _id: {
-            difficulty: "$submittedProblems.problem.difficulty"
-          },
-          totalSubmitted: { $sum: 1 },
-          solvedSubmitted: { $sum: 1 }
-        }
-      },
-      {
-        $group: {
-          _id: "$_id.difficulty",
-          totalProblems: { $first: "$totalSubmitted" },
-          solvedProblems: { $sum: "$solvedSubmitted" }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          difficulty: "$_id",
-          totalProblems: 1,
-          solvedProblems: 1,
-          percentageSolved: {
-            $multiply: [
-              { $divide: ["$solvedProblems", "$totalProblems"] },
-              100
-            ]
-          }
-        }
-      }
-    ]);
+    // Find the user by userId
+    const user = await User.findById(req.params.id).populate('submittedProblems.problem');
 
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Get the submitted problems with the actual Problem documents
+    const submittedProblems = user.submittedProblems.map(submittedProblem => submittedProblem.problem);
+
+    const totalSubmitted = submittedProblems.length;
+    const totalAccepted = submittedProblems.filter(problem => problem?.status === 'Accepted').length;
+    const solvedPercentage = (totalAccepted / totalSubmitted) * 100 || 0;
+
+    console.log(submittedProblems.status);
     res.status(200).json({
-      status: 'success',
-      data: {
-        stats,
-      },
+      totalSubmitted: totalSubmitted,
+      totalAccepted: totalAccepted,
+      solvedPercentage: solvedPercentage
     });
-
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err,    
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 }

@@ -61,7 +61,7 @@ const UserSchema = new Schema({
       type: Schema.Types.ObjectId,
       ref : 'Quiz'
      },
-   submittedProblems :[{
+     submittedProblems :[{
       problem: {
          type: Schema.Types.ObjectId,
          ref: 'Problem',
@@ -87,7 +87,6 @@ const UserSchema = new Schema({
    about:
    {
       type: String,
-      
    },
    profilePic:
    {

@@ -29,7 +29,13 @@ const problemSchema = new Schema({
          "Medium",
          "Hard"
         ]
-     }
+     },
+     inputs: [{
+      type: String
+     }],
+     outputs: [{
+      type: String
+     }]
 });
 
 const Problem = mongoose.model('Problem' , problemSchema);
