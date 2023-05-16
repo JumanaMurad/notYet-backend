@@ -2,37 +2,45 @@ const TeamJoinRequest = require("../models/teamJoinRequestModel")
 const Team = require('../models/teamModel');
 const User = require('../models/userModel');
 const sendEmail = require('../utils/email');
+const catchAsync = require('./../utils/catchAsync');
 
-exports.requestToJoin = async (req, res) => {
-    try {
-        const userId = req.body.userId;
-        const teamId = req.params.teamId;
+exports.requestToJoin = catchAsync ( async (req, res) => {
+    
+    const user = req.user;
+    const {teamName} = req.body;
+    const team = await Team.findOne({teamName });
+    if (!team) {
+    return res.status(404).json({
+      message: 'Team not found',
+    });
+  }
+    // Check if the user is already a member of the team
+    const existingMember = await Team.findOne({ teamMembers: user._id, team:team._id });
+    if (existingMember) {
+        return res.status(400).json(
+        {
+            message: 'User is already a member of the team'
+        });
+    }
+    team.pendingRequests.push(user._id);
+    await team.save();
+    res.status(204).json({
+        status:'success',
+        data : team
+      });
 
-        // Check if the user is already a member of the team
-        const existingMember = await Team.findOne({ teamMembers: userId, team: teamId });
+    // Check if the team is already at maximum capacity
+    if (team.teamMembers.length >= 3) {
+        return res.status(400).json(
+        {
+             message: 'Team is already at maximum capacity'
+        });} 
+        
 
-        if (existingMember) {
-            return res.status(400).json(
-                {
-                    message: 'User is already a member of the team'
-                });
-        }
+    // Add the user to the list of pending requests to join the team
+    //const joinRequest = await TeamJoinRequest.create({ user: userId, team: teamId });
 
-        // Check if the team is already at maximum capacity
-        const team = await Team.findById(teamId);
-
-        if (team.members.length >= 3) {
-            return res.status(400).json(
-                {
-                    message: 'Team is already at maximum capacity'
-                });
-        }
-
-        // Add the user to the list of pending requests to join the team
-        const joinRequest = await TeamJoinRequest.create({ user: userId, team: teamId });
-
-        // send email to team leader
-        const user = await User.findById(userId);
+    /* send email to team leader
         const teamLeaderEmail = team.teamLeader.email;
         const mailOptions = {
             from: user.email,
@@ -43,12 +51,23 @@ exports.requestToJoin = async (req, res) => {
           await sendEmail(mailOptions);
 
 
-        res.status(201).json({ message: "User has requested to join the team." });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Internal server error." });
-    }
-}
+        res.status(201).json({ message: "User has requested to join the team." }); */
+    
+});
+
+exports.getPendingRequests = catchAsync (async (req,res)=>{
+    const {teamName} = req.body;
+    const team = await Team.findOne({teamName });
+    if (!team) {
+    return res.status(404).json({
+      message: 'Team not found',
+    }); }
+    const pendingRequests = team.pendingRequests;
+    res.status(200).json({
+        status: "success",
+        data: {pendingRequests},        
+      });
+});
 
 exports.approveRequestToJoin = async (req, res) => {
     try {

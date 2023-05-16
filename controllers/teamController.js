@@ -1,4 +1,7 @@
+const { ObjectID } = require("mongodb");
+const { db } = require("../models/teamJoinRequestModel");
 const Team = require("../models/teamModel");
+const catchAsync = require('./../utils/catchAsync');
 
 exports.getAllTeams = async (req, res) => {
   try {
@@ -34,22 +37,27 @@ exports.getTeam = async (req, res) => {
   }
 };
 
-exports.createTeam = async (req, res) => {
-  try {
-    const newTeam = await Team.create(req.body);
+exports.createTeam = catchAsync (async (req, res) => {
+    const newTeam = await Team.create({
+      teamName : req.body.teamName,
+      teamMembers : [{user:req.user , role:'team-leader'}],
+    });
+   /* const user=req.user;
+    newTeam.teamMembers.push(user); 
+    newTeam.teamMembers[0].role = "team-leader";  
+    //console.log(user);
+    Team.updateOne(
+      _{id:ObjectId(newTeam._id)}
+    ) */
+    
     res.status(201).json({
       status: "success",
       data: {
         newTeam,
       },
     });
-  } catch (err) {
-    res.status(400).json({
-      status: "fail",
-      message: err,
-    });
-  }
-};
+   
+});
 
 exports.updateTeam = async (req, res) => {
   try {

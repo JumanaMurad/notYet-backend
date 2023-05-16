@@ -21,6 +21,10 @@ const teamSchema = new Schema({
          default: 'member'
       }
    }],
+   pendingRequests : [{
+      type:[Schema.Types.ObjectId],
+      ref : 'User'
+   }],
 }
 );
 
