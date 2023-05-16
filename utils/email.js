@@ -9,7 +9,7 @@ const sendEmail = async options => {
       //  port : process.env.EMAIL_PORT,
      //secure: true,
         auth : {          
-            user : "rabehmohamed82@gmail.com",
+            user : "notyet20.233@gmail.com",
             pass : "nedqxvygcbwonhek"
             //user : process.env.EMAIL_USERNAME,
             //pass : process.env.EMAIL_PASSWORD
@@ -17,7 +17,7 @@ const sendEmail = async options => {
     });
     //2)Define email options
     const mailOptions = {
-        from : "rabehmohamed82@gmail.com",
+        from : "notyet20.233@gmail.com",
         to: options.email ,
         subject: options.subject ,
         text: options.message ,
