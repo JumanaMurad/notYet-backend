@@ -129,38 +129,50 @@ exports.deleteMe = async (req,res) => {
   });
 }
 
+
 exports.getUserProblemStatistics = async (req, res) => {
   try {
-    // Find the user by userId
     const user = await User.findById(req.params.id).populate('submittedProblems.problem');
    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Get the submitted problems with the actual Problem documents
     const submittedProblems = user.submittedProblems;
     const totalSubmitted = submittedProblems.length;
 
     let totalAccepted = 0;
+    let difficultyStats = {
+      Hard: { totalSubmitted: 0, totalAccepted: 0, solvedPercentage: 0 },
+      Easy: { totalSubmitted: 0, totalAccepted: 0, solvedPercentage: 0 },
+      Medium: { totalSubmitted: 0, totalAccepted: 0, solvedPercentage: 0 }
+    };
 
     for (let i = 0; i < totalSubmitted; i++) {
+      const problem = submittedProblems[i].problem;
       if (submittedProblems[i].status === 'Accepted') {
         totalAccepted++;
+        difficultyStats[problem.difficulty].totalAccepted++;
       }
+      difficultyStats[problem.difficulty].totalSubmitted++;
     }
 
-   // const totalAccepted = submittedProblems.filter(problem => problem?.status === 'Accepted').length;
-    const solvedPercentage = (totalAccepted / totalSubmitted) * 100 || 0;
+    for (const difficulty in difficultyStats) {
+      const { totalSubmitted, totalAccepted } = difficultyStats[difficulty];
+      const solvedPercentage = (totalAccepted / totalSubmitted) * 100 || 0;
+      difficultyStats[difficulty].solvedPercentage = solvedPercentage;
+    }
 
-    console.log(submittedProblems.status);
     res.status(200).json({
       totalSubmitted: totalSubmitted,
       totalAccepted: totalAccepted,
-      solvedPercentage: solvedPercentage
+      solvedPercentage: (totalAccepted / totalSubmitted) * 100 || 0,
+      difficultyStats: difficultyStats
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
+
+

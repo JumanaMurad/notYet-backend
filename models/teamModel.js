@@ -1,33 +1,37 @@
 const mongoose = require('mongoose');
+const User = require('../models/userModel');
 
 const Schema = mongoose.Schema;
 
 const teamSchema = new Schema({
    teamName: {
       type: String,
+      trim : true,
       required: true
    },
-   rank: {
-      type: Number,
-
-   },
-   streak: {
-      type: Number,
-   },
-   hint: {
-      type: String,
-   },
-   teamLeader: {
-      type: [Schema.Types.ObjectId],
-      ref: 'User',   
-      required: true
-   },
-   teamMembers: {
-      type: [Schema.Types.ObjectId],
-      ref: 'User'
-   },
+   teamMembers :[{
+      user: {
+         type: Schema.Types.ObjectId,
+         ref: 'User',
+         required: true
+      },
+      role: {
+         type: String,
+         enum: ['member', 'team-leader'],
+         default: 'member'
+      }
+   }],
 }
 );
+
+/* Pre-save middleware
+UserSchema.pre('save', function (next) {
+
+   // Capitalize the first letter of each word in the title
+   this.teamName = this.teamName.replace(/\b\w/g, (match) => match.toUpperCase());
+   
+   next();
+ }); */
 
 const Team = mongoose.model('Team', teamSchema);
 
