@@ -7,35 +7,37 @@ const teamSchema = new Schema({
    teamName: {
       type: String,
       trim : true,
+      unique: true,
       required: true
    },
    teamMembers :[{
       user: {
-         type: Schema.Types.ObjectId,
+         type: String,
          ref: 'User',
          required: true
       },
       role: {
          type: String,
          enum: ['member', 'team-leader'],
-         default: 'member'
+         default: 'member',
+         required: true
       }
    }],
-   pendingRequests : [{
-      type:[Schema.Types.ObjectId],
-      ref : 'User'
+   pendingMembers : [{
+      user: {
+         type: String,
+         ref: 'User',
+         required: true
+      },
+      role: {
+         type: String,
+         default: 'member',
+         required: true
+      }
    }],
 }
 );
 
-/* Pre-save middleware
-UserSchema.pre('save', function (next) {
-
-   // Capitalize the first letter of each word in the title
-   this.teamName = this.teamName.replace(/\b\w/g, (match) => match.toUpperCase());
-   
-   next();
- }); */
 
 const Team = mongoose.model('Team', teamSchema);
 

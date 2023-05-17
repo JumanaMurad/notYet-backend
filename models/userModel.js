@@ -54,9 +54,6 @@ const UserSchema = new Schema({
       default: false,
     },
    emailVerificationToken : String,
-   streak : {
-        type : Number,
-     },
    quizId : {
       type: Schema.Types.ObjectId,
       ref : 'Quiz'
@@ -91,6 +88,14 @@ const UserSchema = new Schema({
    profilePic:
    {
       type: String
+   },
+   joinedTeams: {
+      type: Schema.Types.ObjectId,
+      ref: 'Team'
+   },
+   pendingTeams: {
+      type: Schema.Types.ObjectId,
+      ref: 'Team'
    }
    }  
 );
