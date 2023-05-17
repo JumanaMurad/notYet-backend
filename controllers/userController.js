@@ -133,7 +133,7 @@ exports.deleteMe = async (req,res) => {
 exports.getUserProblemStatistics = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate('submittedProblems.problem');
-   
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -150,6 +150,12 @@ exports.getUserProblemStatistics = async (req, res) => {
 
     for (let i = 0; i < totalSubmitted; i++) {
       const problem = submittedProblems[i].problem;
+
+      // Check if problem is null or undefined
+      if (!problem) {
+        continue;
+      }
+
       if (submittedProblems[i].status === 'Accepted') {
         totalAccepted++;
         difficultyStats[problem.difficulty].totalAccepted++;
