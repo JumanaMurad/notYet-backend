@@ -9,19 +9,17 @@ const router = express.Router();
 router
     .route('/')
     .get(authController.protect , teamController.getAllTeams)
-    .post(authController.protect, teamController.createTeam);
+    .post(authController.protect, teamController.createTeam)
+    .patch(authController.protect, teamController.addTeamMember);
 
-router.post('/sendRequestToJoin',authController.protect , authController.restrictTo("user"),teamReqController.requestToJoin);
+router.patch('/join-team',authController.protect ,teamController.joinTeam);
 
 router.get('/getPendingRequests',authController.protect ,teamReqController.getPendingRequests);
     
 router
     .route('/:id')
-    .patch(authController.protect,teamController.updateTeam)
     .get(authController.protect,teamController.getTeam)
-    .delete(authController.protect ,teamController.DeleteTeam)
-    .post(authController.protect , authController.restrictTo("team-leader"),teamReqController.approveRequestToJoin)
-    .post(authController.protect , authController.restrictTo("team-leader"),teamReqController.rejectRequestToJoin);
+    .delete(authController.protect ,teamController.deleteTeam);
 
 
 module.exports = router;

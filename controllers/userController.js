@@ -1,5 +1,6 @@
 const User = require('../models/userModel');
 const Problem = require('../models/problemModel');
+const catchAsync = require('../utils/catchAsync');
 
 const filterObj = (obj, ...allowedFields)=>{
   const newObj = {};
@@ -9,43 +10,32 @@ const filterObj = (obj, ...allowedFields)=>{
   return newObj;
   }
 
-exports.getAllUsers = async (req,res) => {
-    try {
-        const users = await User.find()
-        .exec()
-        .then(users=>
-          res.status(200).json({
-            status: 'success',
-            results: users.length,
-            data: users,
-          })
-          );       
-    }
-    catch(err){
-        res.status(404).json({
-            status:'fail',
-            message:err
-    })
-}
-}
-
-exports.getUser = async (req, res) => {
-  try {
-    const user = req.user;
-
+exports.getAllUsers = catchAsync(async (req,res) => {
+  const users = await User.find()
+  .exec()
+  .then(users=>
     res.status(200).json({
       status: 'success',
-      data: {
-        user,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
+      results: users.length,
+      data: users,
+    })
+    );       
+}
+);
+
+exports.getUser = catchAsync(async (req, res) => {
+  
+  const user = req.user;
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+
+}
+);
 
 exports.createUser = async (req, res) => {
     try{
