@@ -24,7 +24,7 @@ exports.getAllTeams = async (req, res) => {
 
 exports.getTeam = async (req, res) => {
   try {
-    const team = await Team.findOne({ _id: req.body.id });
+    const team = await Team.findOne({ _id: req.params.id });
     res.status(200).json({
       status: "success",
       data: {
@@ -62,7 +62,7 @@ exports.createTeam = catchAsync(async (req, res) => {
   const pendingMembers = [];
 
   // Add the team leader (current user) to the team members array
-  teamLeader.push({ user: req.user._id, role: 'team-leader' });
+  teamLeader.push({ user: req.user.username, role: 'team-leader',  });
 
   // Loop over the teamMembers array and extract the user IDs
   if (teamMembers && Array.isArray(teamMembers)) {
