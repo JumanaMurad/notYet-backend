@@ -37,24 +37,18 @@ exports.getUser = catchAsync(async (req, res) => {
 }
 );
 
-exports.createUser = async (req, res) => {
-    try{
-    const newUser = await User.create(req.body);
+exports.createUser = catchAsync(async (req, res) => {
+  const newUser = await User.create(req.body);
 
-    res.status(201).json({
-        status: 'success',
-        data: newUser,    
-      });
-    } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err,
-          });
-    }
+  res.status(201).json({
+      status: 'success',
+      data: newUser,    
+    });
 }
+);
 
-exports.updateUser = async (req, res) => {
-  try {
+exports.updateUser = catchAsync(
+  async (req, res) => {
     const user = await User.findByIdAndUpdate(
       { _id: req.params.id },
       req.body
@@ -66,29 +60,18 @@ exports.updateUser = async (req, res) => {
         user
       },
     });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
+}
+);
 
-exports.deleteUser = async (req, res) => {
-  try {
-    const user = await User.findByIdAndRemove(req.params.id);
+exports.deleteUser = catchAsync(async (req, res) => {
+  const user = await User.findByIdAndRemove(req.params.id);
 
-    res.status(204).json({
-      status: 'success',
-      date: null,
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: 'Invalid data sent!',
-    });
-  }
-};
+  res.status(204).json({
+    status: 'success',
+    date: null,
+  });
+
+});
 
 exports.updateMe = async (req,res) => {
   //1)if user entered his password in other field
@@ -169,4 +152,4 @@ exports.getUserProblemStatistics = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
-};
+}

@@ -4,55 +4,28 @@ const Team = require("../models/teamModel");
 const catchAsync = require('./../utils/catchAsync');
 const User = require('../models/userModel');
 
-exports.getAllTeams = async (req, res) => {
-  try {
-    const teams = await Team.find();
-    res.status(200).json({
-      status: "success",
-      results: teams.length,
-      data: {
-        teams,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err,
-    });
-  }
-};
+exports.getAllTeams = catchAsync(async (req, res) => {
+  const teams = await Team.find();
+  res.status(200).json({
+    status: "success",
+    results: teams.length,
+    data: {
+      teams,
+    },
+  });
+}
+);
 
-exports.getTeam = async (req, res) => {
-  try {
-    const team = await Team.findOne({ _id: req.params.id });
-    res.status(200).json({
-      status: "success",
-      data: {
-        team,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err,
-    });
-  }
-};
-
-// exports.createTeam = catchAsync (async (req, res) => {
-//     const newTeam = await Team.create({
-//       teamName : req.body.teamName,
-//       teamMembers : [{user:req.user , role:'team-leader'}],
-//     });
-    
-//     res.status(201).json({
-//       status: "success",
-//       data: {
-//         newTeam,
-//       },
-//     });
-   
-// });
+exports.getTeam = catchAsync( async (req, res) => {
+  const team = await Team.findOne({ _id: req.params.id });
+  res.status(200).json({
+    status: "success",
+    data: {
+      team,
+    },
+  });
+}
+);
 
 exports.createTeam = catchAsync(async (req, res) => {
   const { teamName, teamMembers } = req.body;
@@ -153,7 +126,6 @@ exports.addTeamMember = catchAsync(async (req, res) => {
   });
 });
 
-
 exports.joinTeam = catchAsync(async (req, res) => {
   const { teamName, username } = req.body;
 
@@ -220,7 +192,6 @@ exports.joinTeam = catchAsync(async (req, res) => {
   });
 });
 
-
 // exports.updateTeam = async (req, res) => {
 //   try {
 //     const newTeam = await Team.findByIdAndUpdate(
@@ -250,34 +221,29 @@ exports.deleteTeam = catchAsync( async (req, res) => {
       status: "success",
       data: null,
     });
-  
 }
 );
 
 
-exports.createPendingMembers = async (req, res) => {
-  try {
-    const teamId = req.params.id;
-    const { usernames } = req.body;
+exports.createPendingMembers = catchAsync(async (req, res) => {
+  const teamId = req.params.id;
+  const { usernames } = req.body;
 
-    const team = await Team.findById(teamId);
-    if (!team) {
-      return res.status(404).json({ message: 'Team not found' });
-    }
-
-    const pendingMembers = await User.find({ username: { $in: usernames } });
-    team.pendingMembers.push(...pendingMembers);
-    await team.save();
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        pendingMembers: team.pendingMembers,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+  const team = await Team.findById(teamId);
+  if (!team) {
+    return res.status(404).json({ message: 'Team not found' });
   }
-};
+
+  const pendingMembers = await User.find({ username: { $in: usernames } });
+  team.pendingMembers.push(...pendingMembers);
+  await team.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      pendingMembers: team.pendingMembers,
+    },
+  });
+}
+);
 
