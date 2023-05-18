@@ -23,7 +23,7 @@ const createSendToken = (user , statusCode , res)=>{
 
 exports.signup = catchAsync (async (req,res)=>{ 
     
-    const newUser = await User.create(req.body);  
+    const newUser = await User.create(req.body);
 
     const token = crypto.randomBytes(20).toString('hex');
 
@@ -37,7 +37,7 @@ exports.signup = catchAsync (async (req,res)=>{
     await sendEmail({
         email : newUser.email,
         subject:'verify your email',
-        message: `Please click <a href="${verificationUrl}">here</a> to verify your email address. ${token}`,
+        message: `Please click <a href="${verificationUrl}">here</a> to verify your email address.`,
     });
     createSendToken(newUser , 201 , res);
     
@@ -143,7 +143,7 @@ exports.forgotPassword = async (req,res) => {
     
 }
 
-exports.resetPassword = async (req,res) => {
+exports.resetPassword = catchAsync(async (req,res) => {
     //1)Get user based on token
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
     const user = await User.findOne(
@@ -151,7 +151,7 @@ exports.resetPassword = async (req,res) => {
         passwordResetExpires : {$gt:Date.now()} });           
     //2)if token not expirted and user exists -> set new password
     if(!user){
-        throw error('token is invalid or expired');
+        return res.status(400).json({ status: 'error', message: 'Invalid or expired verification token.' });
     }
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
@@ -161,7 +161,7 @@ exports.resetPassword = async (req,res) => {
     //3)Update changePasswordAt for user   
     //4)Log user in , send JWT
     createSendToken(user , 200 , res);
-}
+})
 
 exports.updatePassword = async(req,res) => {
     //1)Get user from collection
