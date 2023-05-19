@@ -13,7 +13,8 @@ router
 router
     .route('/:id')
     .patch(authController.protect , authController.restrictTo("admin") , problemsController.updateProblem)   
-    .delete(authController.protect,authController.restrictTo('admin' , 'team-leader') ,problemsController.deleteProblem);
+    .delete(authController.protect,authController.restrictTo('admin' , 'team-leader') ,problemsController.deleteProblem)
+    .get(authController.protect, problemsController.getProblem);
     
 
 router.get('/getSolvedProblems',authController.protect,problemsController.getSolvedProblems);
