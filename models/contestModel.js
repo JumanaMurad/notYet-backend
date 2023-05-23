@@ -25,14 +25,9 @@ const contestSchema = new Schema({
     },
     problems: {
         type: [Schema.Types.ObjectId],
-        ref: 'Problem',
-        required: true
-    },
-    feedbackss: {
-        type: [Schema.Types.ObjectId],
-        ref: 'Feedback'
+        ref: 'Problem'
     }
-})
+});
 
 const Contest = mongoose.model('Contest', contestSchema);
 

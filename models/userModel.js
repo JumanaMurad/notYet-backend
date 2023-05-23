@@ -57,8 +57,8 @@ const UserSchema = new Schema({
    quizId : {
       type: Schema.Types.ObjectId,
       ref : 'Quiz'
-     },
-     submittedProblems :[{
+   },
+   submittedProblems :[{
       problem: {
          type: Schema.Types.ObjectId,
          ref: 'Problem',
@@ -76,10 +76,6 @@ const UserSchema = new Schema({
    },
    roadMap : {
       type: String
-   },
-   feedback: {
-      type: [Schema.Types.ObjectId],
-      ref: 'Feedback'
    },
    about:
    {

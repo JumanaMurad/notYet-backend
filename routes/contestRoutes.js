@@ -6,11 +6,11 @@ const router = express.Router();
 router
     .route('/')
     .get(authController.protect ,contestController.getAllContests)
-    .get(authController.protect ,contestController.getContest);
+    .post(authController.protect ,contestController.createContest);
 
 router
     .route('/:id')
-    .get(authController.protect , authController.restrictTo("admin"), contestController.createContest)
+    .get(authController.protect , contestController.getContest)
     .patch(authController.protect , authController.restrictTo("admin"), contestController.updateContest)
     .delete(authController.protect , authController.restrictTo("admin"), contestController.deleteContest);
 

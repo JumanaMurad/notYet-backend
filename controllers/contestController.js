@@ -18,23 +18,17 @@ exports.getAllContests = catchAsync(async (req, res) => {
        });
    });
 
-exports.getContest = async (req, res) => {
-    try {
-      const Contest = await Contest.findById(req.params.id);
-  
-      res.status(200).json({
-        status: 'success',
-        data: {
-            Contest,
-        },
-      });
-    } catch (err) {
-      res.status(404).json({
-        status: 'fail',
-        message: err,
-      });
-    }
-  };
+exports.getContest = catchAsync(async (req, res) => {
+  const contest = await Contest.findById(req.params.id);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+        contest,
+    },
+  });
+
+});
 
 exports.createContest = catchAsync( async (req, res) => {
   const newContest = await Contest.create(req.body);
@@ -49,7 +43,7 @@ exports.createContest = catchAsync( async (req, res) => {
 );
 
 exports.updateContest = catchAsync(async (req, res) => {
-  const Contest = await Contest.findByIdAndUpdate(
+  const contest = await Contest.findByIdAndUpdate(
     { _id: req.params.id },
     req.body
   );
@@ -57,7 +51,7 @@ exports.updateContest = catchAsync(async (req, res) => {
   res.status(200).json({
     status: 'success',
     data: {
-        Contest,
+        contest,
     },
   });
 }

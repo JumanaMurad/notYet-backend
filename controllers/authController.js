@@ -85,13 +85,15 @@ exports.protect = async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(" ")[1];
   }
-  //console.log(token);
+  
   if (!token) {
     throw error("there is no token");
   }
-  //2)Verficiation token
+
+  try {
+    //2)Verficiation token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  //console.log(decoded);
+
 
   //3)Check if user still exists
   const freshUser = await User.findById(decoded.id);
@@ -105,6 +107,13 @@ exports.protect = async (req, res, next) => {
   //give user access to protected route
   req.user = freshUser;
   next();
+  } catch(err){
+    // Handle the JWT verification error
+    return res.status(401).json({
+      status: "error",
+      message: "Invalid token",
+    });
+  }
 };
 
 exports.restrictTo = (...roles) => {
