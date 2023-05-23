@@ -35,7 +35,7 @@ exports.getProblem = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'sucess',
         data: {
-            tour: problem,
+            problem,
         },
     });
 

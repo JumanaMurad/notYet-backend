@@ -5,7 +5,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(getAllProblems)
+  .get(problemsController.getAllProblems)
   .post(
     authController.protect,
     authController.restrictTo("admin"),
