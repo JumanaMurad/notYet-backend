@@ -5,7 +5,7 @@ const router = express.Router();
 
 router
     .route('/')
-    .get(authController.protect ,contestController.getAllContests)
+    .get(contestController.getAllContests)
     .post(authController.protect ,contestController.createContest);
 
 router
