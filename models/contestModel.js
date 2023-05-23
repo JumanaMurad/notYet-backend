@@ -15,10 +15,10 @@ const contestSchema = new Schema({
         type: Date,
         required: true
     },
-    users: {
+    users: [{
         type: [Schema.Types.ObjectId],
         ref: 'User'
-    },
+    }],
     teams: {
         type: [Schema.Types.ObjectId],
         ref: 'Team'
