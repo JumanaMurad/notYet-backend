@@ -24,16 +24,17 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signup = catchAsync(async (req, res) => {
-  const newUser = await User.create(req.body);
+  const newUser = new User(req.body);
+  
 
   const token = crypto.randomBytes(20).toString("hex");
 
   newUser.emailVerificationToken = token;
 
-  //await newUser.save();
+  await newUser.save();
 
   // Construct the verification URL
-  const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
+  const verificationUrl = `$http://localhost:3000/login/verify-email?emailVerificationToken=${token}`;
 
   await sendEmail({
     email: newUser.email,
@@ -43,9 +44,9 @@ exports.signup = catchAsync(async (req, res) => {
   createSendToken(newUser, 201, res);
 });
 
-exports.verifyEmail = async (req, res) => {
+exports.verifyEmail = catchAsync( async (req, res) => {
   const user = await User.findOneAndUpdate(
-    { emailVerificationToken: req.query.token },
+    { emailVerificationToken: req.params.token },
     { emailVerified: true, emailVerificationToken: null },
     { new: true }
   );
@@ -58,7 +59,7 @@ exports.verifyEmail = async (req, res) => {
   res
     .status(200)
     .json({ status: "success", message: "Email verified successfully." });
-};
+});
 
 exports.login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
