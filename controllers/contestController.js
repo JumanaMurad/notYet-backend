@@ -11,7 +11,7 @@ exports.getAllContests = catchAsync(async (req, res) => {
  
        res.status(200).json({
          status: 'success',
-         results: Contests.length,
+         results: contests.length,
          data: {
            contests,
          },

@@ -35,7 +35,11 @@ const problemSchema = new Schema({
      }],
      outputs: [{
       type: String
-     }]
+     }],
+     numberOfSolution: {
+      type: Number,
+      default: 0
+     }
 });
 
 const Problem = mongoose.model('Problem' , problemSchema);
