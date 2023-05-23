@@ -7,13 +7,13 @@ exports.getAllContests = catchAsync(async (req, res) => {
        let queryStr = JSON.stringify(queryObj);
        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
  
-       const Contests = await Contest.find(JSON.parse(queryStr));
+       const contests = await Contest.find(JSON.parse(queryStr));
  
        res.status(200).json({
          status: 'success',
          results: Contests.length,
          data: {
-           Contests,
+           contests,
          },
        });
    });
