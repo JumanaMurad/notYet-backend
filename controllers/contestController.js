@@ -68,9 +68,18 @@ exports.deleteContest = catchAsync(async (req, res) => {
 );
 
 exports.registerToContest = catchAsync(async (req,res)=> {
-  const contest = await Contest.findById(req.body.id).populate('users');
-  const user = await User.findOne({ username : req.body.username });
-
+  const { username, contestId } = req.body;
+  const contest = await Contest.findById(contestId);
+  
+  if (!contest) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Contest not found',
+    });
+  }
+  const user = await User.findOne({ username });
+  console.log(user);
+  
   if (!user) {
     return res.status(404).json({
       status: 'fail',
