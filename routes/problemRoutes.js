@@ -5,37 +5,18 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(problemsController.getAllProblems)
+  .get(getAllProblems)
   .post(
     authController.protect,
     authController.restrictTo("admin"),
     problemsController.createProblem
   );
 
-router
-<<<<<<< HEAD
-    .route('/')    
-    .get(problemsController.getAllProblems)
-    .post(authController.protect , authController.restrictTo('admin') ,problemsController.createProblem);
-=======
-  .route("/:id")
-  .patch(
-    authController.protect,
-    authController.restrictTo("admin"),
-    problemsController.updateProblem
-  )
-  .delete(
-    authController.protect,
-    authController.restrictTo("admin", "team-leader"),
-    problemsController.deleteProblem
-  )
+router.route("/:id")
+  .patch(authController.protect, authController.restrictTo("admin"), problemsController.updateProblem)
+  .delete(authController.protect, authController.restrictTo("admin"), problemsController.deleteProblem)
   .get(authController.protect, problemsController.getProblem);
->>>>>>> 2852eff05d990b5beb35af8050504639859ff8f8
 
-router.get(
-  "/getSolvedProblems",
-  authController.protect,
-  problemsController.getSolvedProblems
-);
+router.get("/getSolvedProblems",authController.protect,problemsController.getSolvedProblems);
 
 module.exports = router;
