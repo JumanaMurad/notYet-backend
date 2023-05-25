@@ -7,7 +7,7 @@ const AppError = require('./utils/appError');
 const globalErorHandler = require('./controllers/errorController');
 //const mongoose = require('mongoose');
 
-const contentRouter = require("./routes/problemRoutes");
+const problemRouter = require("./routes/problemRoutes");
 const teamRouter = require("./routes/teamRoutes");
 const userRouter = require("./routes/userRoutes");
 const courseRouter = require('./routes/courseRoutes');
@@ -35,7 +35,7 @@ app.use(cors());
 
 // ROUTES
 app.use('/users', userRouter);
-app.use('/problems', contentRouter);
+app.use('/problems', problemRouter);
 app.use('/teams', teamRouter);
 app.use('/courses', courseRouter);
 app.use('/quizes', quizRouter);

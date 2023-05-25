@@ -36,7 +36,7 @@ const problemSchema = new Schema({
      outputs: [{
       type: String
      }],
-     numberOfSolution: {
+     numberOfSolutions: {
       type: Number,
       default: 0
      }

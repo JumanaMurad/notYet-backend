@@ -12,11 +12,30 @@ router
     problemsController.createProblem
   );
 
-router.route("/:id")
-  .patch(authController.protect, authController.restrictTo("admin"), problemsController.updateProblem)
-  .delete(authController.protect, authController.restrictTo("admin"), problemsController.deleteProblem)
+router
+  .route("/:id")
+  .patch(
+    authController.protect,
+    authController.restrictTo("admin"),
+    problemsController.updateProblem
+  )
+  .delete(
+    authController.protect,
+    authController.restrictTo("admin"),
+    problemsController.deleteProblem
+  )
   .get(authController.protect, problemsController.getProblem);
 
-router.get("/getSolvedProblems",authController.protect,problemsController.getSolvedProblems);
+// router.get(
+//   "/getSolvedProblems",
+//   authController.protect,
+//   problemsController.getSolvedProblems
+// );
+
+router.patch(
+  "/submitproblem/:id",
+  authController.protect,
+  problemsController.submitProblem
+);
 
 module.exports = router;
