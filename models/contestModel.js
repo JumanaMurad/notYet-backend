@@ -26,6 +26,14 @@ const contestSchema = new Schema({
     problems: {
         type: [Schema.Types.ObjectId],
         ref: 'Problem'
+    },
+    indvidualStanding: {
+        type: [Schema.Types.ObjectId],
+        ref: 'User'
+    },
+    teamStanding: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Team'
     }
 });
 

@@ -67,11 +67,10 @@ exports.deleteContest = catchAsync(async (req, res) => {
 }
 );
 
-<<<<<<< HEAD
 
-=======
 exports.registerToContest = catchAsync(async (req,res)=> {
-  const { username, contestId } = req.body;
+  const username = req.body;
+  const contestId = req.params.id;
   const contest = await Contest.findById(contestId);
   
   if (!contest) {
@@ -107,5 +106,4 @@ exports.registerToContest = catchAsync(async (req,res)=> {
     },
   });
 });
->>>>>>> e45466ccd2978d2af38922f77521fff56f782f42
   
