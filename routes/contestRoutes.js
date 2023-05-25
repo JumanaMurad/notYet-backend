@@ -7,12 +7,16 @@ router
     .route('/')
     .get(contestController.getAllContests)
     .post(authController.protect ,contestController.createContest);
-
-router
+    
+    
+    router
     .route('/:id')
     .get(authController.protect , contestController.getContest)
     .patch(authController.protect , authController.restrictTo("admin"), contestController.updateContest)
     .delete(authController.protect , authController.restrictTo("admin"), contestController.deleteContest);
+    
+    
+    router.patch('/register-contest/' ,authController.protect,contestController.registerToContest);
 
 
 /* router

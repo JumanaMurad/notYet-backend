@@ -67,5 +67,45 @@ exports.deleteContest = catchAsync(async (req, res) => {
 }
 );
 
+<<<<<<< HEAD
 
+=======
+exports.registerToContest = catchAsync(async (req,res)=> {
+  const { username, contestId } = req.body;
+  const contest = await Contest.findById(contestId);
+  
+  if (!contest) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Contest not found',
+    });
+  }
+  const user = await User.findOne({ username });
+  console.log(user);
+  
+  if (!user) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'User not found',
+    });
+  }
+
+  if (contest.users.includes(user._id)) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'User already registered to the contest',
+    });
+  }
+
+  contest.users.push(user._id);
+  await contest.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+        contest,
+    },
+  });
+});
+>>>>>>> e45466ccd2978d2af38922f77521fff56f782f42
   
