@@ -252,6 +252,32 @@ exports.deleteTeam = catchAsync(async (req, res) => {
   });
 });
 
+exports.editTeamName = catchAsync(async (req, res) => {
+  const teamId = req.params.id;
+  const { teamName } = req.body;
+
+  // Find the team by its ID
+  const team = await Team.findById(teamId);
+
+  if (!team) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Team not found',
+    });
+  }
+
+  // Update the team name
+  team.teamName = teamName;
+  await team.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      team,
+    },
+  });
+});
+
 
 
 // exports.createPendingMembers = catchAsync(async (req, res) => {

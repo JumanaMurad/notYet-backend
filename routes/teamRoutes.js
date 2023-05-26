@@ -7,10 +7,11 @@ const router = express.Router();
 
 router
     .route('/')
-    .get(authController.protect , teamController.getAllTeams)
+    .get(authController.protect, authController.restrictTo('admin'), teamController.getAllTeams)
     .patch(authController.protect, teamController.addTeamMember);
 
 router.patch('/join-team',authController.protect ,teamController.joinTeam);
+router.patch('/edit-team-name/:id', authController.protect, authController.restrictTo('admin'), teamController.editTeamName);
     
 router
     .route('/:id')
