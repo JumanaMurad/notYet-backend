@@ -52,16 +52,16 @@ exports.createTeam = catchAsync(async (req, res) => {
     pendingMembers
   });
 
-  // Add team ID to the joinedTeams array for the team leader
+  // Add team name to the joinedTeams array for the team leader
   const user = await User.findByIdAndUpdate(userId, {
-    $push: { joinedTeams: newTeam._id }
+    $push: { joinedTeams: newTeam.teamName }
   });
 
-  // Add team ID to the pendingTeams array for each team member
+  // Add team name to the pendingTeams array for each team member
   for (const member of teamMembers) {
     const username = member.user;
     await User.findOneAndUpdate({ username }, {
-      $push: { pendingTeams: newTeam._id }
+      $push: { pendingTeams: newTeam.teamName }
     });
   }
 
@@ -72,6 +72,7 @@ exports.createTeam = catchAsync(async (req, res) => {
     }
   });
 });
+
 
 exports.addTeamMember = catchAsync(async (req, res) => {
   const { teamName, username } = req.body;
@@ -119,10 +120,10 @@ exports.addTeamMember = catchAsync(async (req, res) => {
     });
   }
 
-  //// Add team ID to the pendingTeams array for the user
+  // Add team name to the pendingTeams array for the user
   await User.findOneAndUpdate({ username }, {
-    $push: { pendingTeams: team._id}
-  })
+    $push: { pendingTeams: team.teamName }
+  });
 
   // Create a new team member object
   const newTeamMember = {
@@ -143,6 +144,7 @@ exports.addTeamMember = catchAsync(async (req, res) => {
     },
   });
 });
+
 
 exports.joinTeam = catchAsync(async (req, res) => {
   const { teamName, username } = req.body;
@@ -186,7 +188,7 @@ exports.joinTeam = catchAsync(async (req, res) => {
   if (isTeamMember || isPendingMember) {
     return res.status(400).json({
       status: 'fail',
-      message: 'You are a team member or pending member',
+      message: 'You are already a team member or pending member',
     });
   }
 
@@ -199,9 +201,9 @@ exports.joinTeam = catchAsync(async (req, res) => {
   // Always add the team member pendingMembers
   team.pendingMembers.push(newTeamMember);
 
-  // Add team ID to the pendingTeams array for each team member
+  // Add team name to the pendingTeams array for the user
   await User.findOneAndUpdate({ username }, {
-    $push: { pendingTeams: team._id }
+    $push: { pendingTeams: team.teamName }
   });
 
   await team.save();
@@ -214,6 +216,7 @@ exports.joinTeam = catchAsync(async (req, res) => {
     },
   });
 });
+
 
 exports.deleteTeam = catchAsync(async (req, res) => {
   const teamId = req.params.id;
@@ -228,16 +231,16 @@ exports.deleteTeam = catchAsync(async (req, res) => {
     });
   }
 
-  // Remove team ID from joinedTeams array for all team members
+  // Remove team name from joinedTeams array for all team members
   const updateUsers = await User.updateMany(
-    { joinedTeams: teamId },
-    { $pull: { joinedTeams: teamId } }
+    { joinedTeams: team.teamName },
+    { $pull: { joinedTeams: team.teamName } }
   );
 
-  // Remove team ID from pendingTeams array for all pending members
+  // Remove team name from pendingTeams array for all pending members
   const updatePendingUsers = await User.updateMany(
-    { pendingTeams: teamId },
-    { $pull: { pendingTeams: teamId } }
+    { pendingTeams: team.teamName },
+    { $pull: { pendingTeams: team.teamName } }
   );
 
   // Delete the team
@@ -248,8 +251,6 @@ exports.deleteTeam = catchAsync(async (req, res) => {
     message: 'Team deleted successfully'
   });
 });
-
-
 
 
 

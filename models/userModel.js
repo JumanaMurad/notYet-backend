@@ -85,14 +85,14 @@ const UserSchema = new Schema({
    {
       type: String
    },
-   joinedTeams: {
-      type: Schema.Types.ObjectId,
+   joinedTeams: [{
+      type: String,
       ref: 'Team'
-   },
-   pendingTeams: {
-      type: Schema.Types.ObjectId,
+   }],
+   pendingTeams: [{
+      type: String,
       ref: 'Team'
-   }
+   }]
    }  
 );
 
