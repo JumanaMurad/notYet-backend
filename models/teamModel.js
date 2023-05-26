@@ -38,6 +38,9 @@ const teamSchema = new Schema({
    contests: {
       type: [Schema.Types.ObjectId],
       ref: 'Contest'
+   },
+   sessionId: {
+      type: String
    }
 }
 );

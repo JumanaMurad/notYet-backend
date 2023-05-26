@@ -16,7 +16,9 @@ router
     .delete(authController.protect , authController.restrictTo("admin"), contestController.deleteContest);
     
     
-    router.patch('/register-team-contest/:id' ,authController.protect,contestController.registerTeamForContest);
+    router.patch('/register-team-contest/:id', authController.protect, contestController.registerTeamForContest);
+
+    router.patch('/register-contest/:id', authController.protect, contestController.registerUserForContest);
 
 
 /* router

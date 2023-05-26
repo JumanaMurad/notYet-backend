@@ -1,4 +1,6 @@
 const Contest = require('../models/ContestModel');
+const Team = require('../models/teamModel');
+const User = require('../models/userModel')
 const catchAsync = require('../utils/catchAsync');
 
 exports.getAllContests = catchAsync(async (req, res) => {
@@ -16,7 +18,8 @@ exports.getAllContests = catchAsync(async (req, res) => {
            contests,
          },
        });
-   });
+});
+
 
 exports.getContest = catchAsync(async (req, res) => {
   const contest = await Contest.findById(req.params.id);
@@ -30,6 +33,7 @@ exports.getContest = catchAsync(async (req, res) => {
 
 });
 
+
 exports.createContest = catchAsync( async (req, res) => {
   const newContest = await Contest.create(req.body);
 
@@ -41,6 +45,7 @@ exports.createContest = catchAsync( async (req, res) => {
   });
 }
 );
+
 
 exports.updateContest = catchAsync(async (req, res) => {
   const contest = await Contest.findByIdAndUpdate(
@@ -57,6 +62,7 @@ exports.updateContest = catchAsync(async (req, res) => {
 }
 );
   
+
 exports.deleteContest = catchAsync(async (req, res) => {
   await Contest.findByIdAndRemove(req.params.id);
 
@@ -68,74 +74,93 @@ exports.deleteContest = catchAsync(async (req, res) => {
 );
 
 
-// exports.registerToContest = catchAsync(async (req,res)=> {
-//   const username = req.body;
-//   const contestId = req.params.id;
-//   const contest = await Contest.findById(contestId);
-  
-//   if (!contest) {
-//     return res.status(404).json({
-//       status: 'fail',
-//       message: 'Contest not found',
-//     });
-//   }
-//   const user = await User.findOne({ username });
-//   console.log(user);
-  
-//   if (!user) {
-//     return res.status(404).json({
-//       status: 'fail',
-//       message: 'User not found',
-//     });
-//   }
+exports.registerUserForContest = catchAsync(async (req, res) => {
+  const { username } = req.body;
+  const contestId = req.params.id;
 
-//   if (contest.users.includes(user._id)) {
-//     return res.status(400).json({
-//       status: 'fail',
-//       message: 'User already registered to the contest',
-//     });
-//   }
+  // Find the contest
+  const contest = await Contest.findById(contestId);
 
-//   contest.users.push(user._id);
-//   await contest.save();
-
-//   res.status(200).json({
-//     status: 'success',
-//     data: {
-//         contest,
-//     },
-//   });
-// });
-  
-
-exports.registerTeamForContest = async (req, res) => {
-  const { teamName } = req.body;
-  const { contestId } = req.params;
-
-  try {
-    // Check if the contest exists
-    const contest = await Contest.findById(contestId);
-    if (!contest) {
-      return res.status(404).json({ message: 'Contest not found' });
-    }
-
-    // Check if the team name is already taken
-    const existingTeam = await Team.findOne({ name: teamName });
-    if (existingTeam) {
-      return res.status(400).json({ message: 'Team name is already taken' });
-    }
-
-    // Create a new team
-    const team = new Team({ name: teamName });
-    await team.save();
-
-    // Add the team to the contest's teams list
-    contest.teams.push(team._id);
-    await contest.save();
-
-    res.status(200).json({ message: 'Team registered successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+  if (!contest) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Contest not found'
+    });
   }
-};
+
+  // Find the user by username
+  const user = await User.findOne({ username });
+
+  if (!user) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'User not found'
+    });
+  }
+
+  // Check if the user ID already exists in the contest's users list
+  if (contest.users.includes(user._id)) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'User is already registered for the contest'
+    });
+  }
+
+  // Add the user's ID to the users list in the contest
+  contest.users.push(user._id);
+  await contest.save();
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      contest
+    }
+  });
+});
+
+
+exports.registerTeamForContest = catchAsync(async (req, res) => {
+  const { teamName } = req.body;
+  const contestId = req.params.id;
+
+  // Find the contest
+  const contest = await Contest.findById(contestId);
+
+  if (!contest) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Contest not found'
+    });
+  }
+
+  // Find the team by its name
+  const team = await Team.findOne({ teamName });
+
+  if (!team) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Team not found'
+    });
+  }
+
+  // Check if the team ID already exists in the contest's teams list
+  if (contest.teams.includes(team._id)) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Team is already registered for the contest'
+    });
+  }
+
+  // Add the team's ID to the teams list in the contest
+  contest.teams.push(team._id);
+  await contest.save();
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      contest
+    }
+  });
+});
+
+
