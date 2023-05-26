@@ -9,7 +9,6 @@ const router = express.Router();
 router
     .route('/')
     .get(authController.protect , teamController.getAllTeams)
-    .post(authController.protect, teamController.createTeam)
     .patch(authController.protect, teamController.addTeamMember);
 
 router.patch('/join-team',authController.protect ,teamController.joinTeam);
@@ -19,6 +18,7 @@ router.get('/getPendingRequests',authController.protect ,teamReqController.getPe
 router
     .route('/:id')
     .get(authController.protect,teamController.getTeam)
+    .post(authController.protect, teamController.createTeam)
     .delete(authController.protect ,teamController.deleteTeam);
 
 

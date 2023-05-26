@@ -35,6 +35,10 @@ const teamSchema = new Schema({
          required: true
       }
    }],
+   contests: {
+      type: [Schema.Types.ObjectId],
+      ref: 'Contest'
+   }
 }
 );
 
