@@ -1,8 +1,6 @@
 const express = require('express');
 const teamController = require('../controllers/teamController');
 const authController = require("../controllers/authController");
-const teamReqController = require("../controllers/teamJoinRequestController");
-const router = express.Router();
 
 
 
@@ -12,8 +10,6 @@ router
     .patch(authController.protect, teamController.addTeamMember);
 
 router.patch('/join-team',authController.protect ,teamController.joinTeam);
-
-router.get('/getPendingRequests',authController.protect ,teamReqController.getPendingRequests);
     
 router
     .route('/:id')
