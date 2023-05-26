@@ -1,5 +1,3 @@
-const { ObjectID } = require("mongodb");
-const { db } = require("../models/teamJoinRequestModel");
 const Team = require("../models/teamModel");
 const catchAsync = require('./../utils/catchAsync');
 const User = require('../models/userModel');
@@ -74,7 +72,6 @@ exports.createTeam = catchAsync(async (req, res) => {
     }
   });
 });
-
 
 exports.addTeamMember = catchAsync(async (req, res) => {
   const { teamName, username } = req.body;
@@ -218,27 +215,6 @@ exports.joinTeam = catchAsync(async (req, res) => {
   });
 });
 
-// exports.updateTeam = async (req, res) => {
-//   try {
-//     const newTeam = await Team.findByIdAndUpdate(
-//       { _id: req.params.id },
-//       req.body
-//     );
-
-//     res.status(200).json({
-//       status: "success",
-//       data: {
-//         newTeam,
-//       },
-//     });
-//   } catch (err) {
-//     res.status(400).json({
-//       status: "fail",
-//       message: err,
-//     });
-//   }
-// };
-
 exports.deleteTeam = catchAsync(async (req, res) => {
   const teamId = req.params.id;
 
@@ -272,6 +248,7 @@ exports.deleteTeam = catchAsync(async (req, res) => {
     message: 'Team deleted successfully'
   });
 });
+
 
 
 
