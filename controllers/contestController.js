@@ -183,7 +183,10 @@ exports.submitContestsProblem = catchAsync(async (req,res) => {
   if(team.teamMembers.includes(user.userId) && status === 'Accepted' && !isProblemSubmitted){
     team.numberOfSolvedProblems ++;
     team.submittedProblems.push(problemId);
+    res.status(200).json({ message: 'Problem submitted successfully' });
   }
+
+  await team.save();
 
 
 });
