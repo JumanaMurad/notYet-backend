@@ -163,4 +163,27 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
   });
 });
 
+exports.submitContestsProblem = catchAsync(async (req,res) => {
+  const { contestId, teamName , status } = req.body;
+  const contest = await Contest.findById(contestId);
+  const team = await contest.teams.findOne(team => team.teamName === teamName);
+  const problemId = req.params.problemId ; 
+  const user = req.user;
 
+  if(!problem){
+    return res.status(404).json({ message: 'problem not found' });
+  }
+  
+  if (!team) {
+    return res.status(404).json({ message: 'Team not found' });
+  }
+
+  const isProblemSubmitted = team.submittedProblems.includes(problemId);
+
+  if(team.teamMembers.includes(user.userId) && status === 'Accepted' && !isProblemSubmitted){
+    team.numberOfSolvedProblems ++;
+    team.submittedProblems.push(problemId);
+  }
+
+
+});
