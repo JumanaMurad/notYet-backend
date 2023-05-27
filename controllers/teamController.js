@@ -278,27 +278,115 @@ exports.editTeamName = catchAsync(async (req, res) => {
   });
 });
 
+exports.acceptRequest = catchAsync(async (req, res) => {
+  const { username, teamName } = req.body;
 
+  // Find the team by teamName
+  const team = await Team.findOne({ teamName });
 
-// exports.createPendingMembers = catchAsync(async (req, res) => {
-//   const teamId = req.params.id;
-//   const { usernames } = req.body;
+  if (!team) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Team not found',
+    });
+  }
 
-//   const team = await Team.findById(teamId);
-//   if (!team) {
-//     return res.status(404).json({ message: 'Team not found' });
-//   }
+  // Find the user by username
+  const user = await User.findOne({ username });
 
-//   const pendingMembers = await User.find({ username: { $in: usernames } });
-//   team.pendingMembers.push(...pendingMembers);
-//   await team.save();
+  if (!user) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'User not found',
+    });
+  }
 
-//   res.status(200).json({
-//     status: 'success',
-//     data: {
-//       pendingMembers: team.pendingMembers,
-//     },
-//   });
-// }
-// );
+  // Check if the user is a pending member of the team
+  const pendingMemberIndex = team.pendingMembers.findIndex(
+    (member) => member.user === username
+  );
+
+  if (pendingMemberIndex === -1) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'User is not a pending member of the team',
+    });
+  }
+
+  // Remove the user from the pendingMembers list
+  team.pendingMembers.splice(pendingMemberIndex, 1);
+
+  // Add the user to the teamMembers list
+  team.teamMembers.push({ user: username, role: 'member' });
+
+  // Update the team and user models
+  await Promise.all([
+    Team.updateOne({ teamName }, team),
+    User.updateOne({ username }, { $pull: { pendingTeams: teamName }, $push: { joinedTeams: teamName } }),
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Request accepted successfully',
+    data: {
+      team,
+    },
+  });
+});
+
+exports.rejectRequest = catchAsync(async (req, res) => {
+  const { username, teamName } = req.body;
+
+  // Find the team by teamName
+  const team = await Team.findOne({ teamName });
+
+  if (!team) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Team not found',
+    });
+  }
+
+  // Find the user by username
+  const user = await User.findOne({ username });
+
+  if (!user) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'User not found',
+    });
+  }
+
+  // Check if the user is a pending member of the team
+  const pendingMemberIndex = team.pendingMembers.findIndex(
+    (member) => member.user === username
+  );
+
+  if (pendingMemberIndex === -1) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'User is not a pending member of the team',
+    });
+  }
+
+  // Remove the user from the pendingMembers list
+  team.pendingMembers.splice(pendingMemberIndex, 1);
+
+  // Remove the team name from the pendingTeams list
+  user.pendingTeams = user.pendingTeams.filter((team) => team !== teamName);
+
+  // Update the team and user models
+  await Promise.all([
+    Team.updateOne({ teamName }, team),
+    User.updateOne({ username }, user),
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Request rejected successfully',
+    data: {
+      team,
+    },
+  });
+});
 

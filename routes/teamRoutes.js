@@ -12,7 +12,9 @@ router
 
 router.patch('/join-team',authController.protect ,teamController.joinTeam);
 router.patch('/edit-team-name/:id', authController.protect, authController.restrictTo('admin'), teamController.editTeamName);
-    
+router.patch('/accept-request', authController.protect, teamController.acceptRequest);
+router.patch('/reject-request', authController.protect, teamController.rejectRequest);
+
 router
     .route('/:id')
     .get(authController.protect,teamController.getTeam)
