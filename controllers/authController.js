@@ -25,7 +25,6 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.signup = catchAsync(async (req, res) => {
   const newUser = new User(req.body);
-  
 
   const token = crypto.randomBytes(20).toString("hex");
 
@@ -34,7 +33,7 @@ exports.signup = catchAsync(async (req, res) => {
   await newUser.save();
 
   // Construct the verification URL
-  const verificationUrl = `$http://localhost:3000/login/verify-email?emailVerificationToken=${token}`;
+  const verificationUrl = `http://localhost:3000/login/VerifyEmail?emailVerificationToken=${token}`;
 
   await sendEmail({
     email: newUser.email,
@@ -44,7 +43,7 @@ exports.signup = catchAsync(async (req, res) => {
   createSendToken(newUser, 201, res);
 });
 
-exports.verifyEmail = catchAsync( async (req, res) => {
+exports.verifyEmail = catchAsync(async (req, res) => {
   const user = await User.findOneAndUpdate(
     { emailVerificationToken: req.params.token },
     { emailVerified: true, emailVerificationToken: null },
@@ -86,29 +85,28 @@ exports.protect = async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(" ")[1];
   }
-  
+
   if (!token) {
     throw error("there is no token");
   }
 
   try {
     //2)Verficiation token
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-
-  //3)Check if user still exists
-  const freshUser = await User.findById(decoded.id);
-  if (!freshUser) {
-    throw error("token : no longer exist");
-  }
-  //4)check if user changed password after token was issued
-  if (freshUser.changePasswordAfter(decoded.iat)) {
-    //throw error('user changed password');
-  }
-  //give user access to protected route
-  req.user = freshUser;
-  next();
-  } catch(err){
+    //3)Check if user still exists
+    const freshUser = await User.findById(decoded.id);
+    if (!freshUser) {
+      throw error("token : no longer exist");
+    }
+    //4)check if user changed password after token was issued
+    if (freshUser.changePasswordAfter(decoded.iat)) {
+      //throw error('user changed password');
+    }
+    //give user access to protected route
+    req.user = freshUser;
+    next();
+  } catch (err) {
     // Handle the JWT verification error
     return res.status(401).json({
       status: "error",
