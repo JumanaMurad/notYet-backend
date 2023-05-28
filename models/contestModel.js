@@ -20,9 +20,23 @@ const contestSchema = new Schema({
         ref: 'User'
     }],
     teams: {
-        type: [Schema.Types.ObjectId],
-        ref: 'Team'
-    },
+        teamName : {
+            type:   String,
+            ref: 'Team'
+       }, 
+       sessionId : {
+        type : String
+       },
+       numberOfSolvedProblems : {
+        type : Number
+       },
+       submittedProblems : [{
+        problemId :{
+            type : String,
+            ref : 'Problem'
+        }
+       }]
+           },       
     problems: {
         type: [Schema.Types.ObjectId],
         ref: 'Problem'

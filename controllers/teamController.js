@@ -1,6 +1,7 @@
 const Team = require("../models/teamModel");
-const catchAsync = require('./../utils/catchAsync');
 const User = require('../models/userModel');
+const catchAsync = require('./../utils/catchAsync');
+const sendEmail = require("../utils/email");
 
 exports.getAllTeams = catchAsync(async (req, res) => {
   const teams = await Team.find();
@@ -125,6 +126,20 @@ exports.addTeamMember = catchAsync(async (req, res) => {
     $push: { pendingTeams: team.teamName }
   });
 
+  const acceptUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
+  const rejectUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
+ 
+  await sendEmail({
+    email: user.email,
+    subject: `NOT YET ! TEAM INVITATION.`,
+    message: `<p>Hello ${user.username},</p>
+    <p You're invtied to join : ${team.teamName}.</p>
+    <p>Do you want to accept or reject this request?</p>
+    <a href="${acceptUrl}"><button style="background-color: green; color: white; padding: 10px;">Yes</button></a>
+    <a href="${rejectUrl}"><button style="background-color: red; color: white; padding: 10px;">No</button></a>
+    `,
+  });
+
   // Create a new team member object
   const newTeamMember = {
     user: user.username,
@@ -151,7 +166,7 @@ exports.joinTeam = catchAsync(async (req, res) => {
 
   // Find the team by teamName
   const team = await Team.findOne({ teamName });
-
+  const teamLeader = team.teamMembers.find(member => member.role === 'team-leader');
   if (!team) {
     return res.status(404).json({
       status: 'fail',
@@ -191,6 +206,21 @@ exports.joinTeam = catchAsync(async (req, res) => {
       message: 'You are already a team member or pending member',
     });
   }
+
+  //edit fel urls dol a hussein
+  const acceptUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
+  const rejectUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
+ 
+  await sendEmail({
+    email: teamLeader.email,
+    subject: "A new user watns to join your team.",
+    message: `<p>Hello ${teamLeader.username},</p>
+    <p>A new user, ${user.username}, has requested to join your team, ${team.teamName}.</p>
+    <p>Do you want to accept or reject this request?</p>
+    <a href="${acceptUrl}"><button style="background-color: green; color: white; padding: 10px;">Yes</button></a>
+    <a href="${rejectUrl}"><button style="background-color: red; color: white; padding: 10px;">No</button></a>
+    `,
+  });
 
   // Create a new team member object
   const newTeamMember = {
