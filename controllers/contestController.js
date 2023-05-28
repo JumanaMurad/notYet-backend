@@ -163,4 +163,3 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
   });
 });
 
-

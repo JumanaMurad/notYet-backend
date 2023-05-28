@@ -34,7 +34,10 @@ const contestSchema = new Schema({
     teamStanding: {
         type: [Schema.Types.ObjectId],
         ref: 'Team'
-    }
+    },
+    sessionId: {
+        type: String
+     }
 });
 
 const Contest = mongoose.model('Contest', contestSchema);

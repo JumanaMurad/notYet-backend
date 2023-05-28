@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const Problem = require('../models/problemModel');
 const catchAsync = require('../utils/catchAsync');
+const APIFeatures = require('../utils/apiFeatures');
 
 const filterObj = (obj, ...allowedFields)=>{
   const newObj = {};
@@ -8,7 +9,7 @@ const filterObj = (obj, ...allowedFields)=>{
     if(allowedFields.includes(el)) newObj[el]=obj[el];
   });
   return newObj;
-  }
+}
 
 exports.getAllUsers = catchAsync(async (req,res) => {
   const users = await User.find()
