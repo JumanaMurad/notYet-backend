@@ -20,7 +20,7 @@ router
 
     router.patch('/register-contest/:id', authController.protect, contestController.registerUserForContest);
 
-    router.post('/submitProblem/:id',authController.protect , contestController.submitContestsProblem);
+    router.post('/submit-problem/:id',authController.protect , contestController.submitContestsProblem);
 
 
 /* router

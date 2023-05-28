@@ -1,6 +1,7 @@
 const Contest = require('../models/ContestModel');
 const Team = require('../models/teamModel');
 const User = require('../models/userModel')
+const Problem = require('../models/problemModel')
 const catchAsync = require('../utils/catchAsync');
 
 exports.getAllContests = catchAsync(async (req, res) => {
@@ -98,16 +99,16 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     });
   }
 
-  // Check if the user ID already exists in the contest's users list
-  if (contest.users.includes(user._id)) {
+  // Check if the user's username already exists in the contest's users list
+  if (contest.users.includes(user.username)) {
     return res.status(400).json({
       status: 'fail',
       message: 'User is already registered for the contest'
     });
   }
 
-  // Add the user's ID to the users list in the contest
-  contest.users.push(user._id);
+  // Add the user's username to the users list in the contest
+  contest.users.push(user.username);
   await contest.save();
 
   res.status(201).json({
@@ -117,6 +118,7 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     }
   });
 });
+
 
 
 exports.registerTeamForContest = catchAsync(async (req, res) => {
@@ -143,16 +145,22 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
     });
   }
 
-  // Check if the team ID already exists in the contest's teams list
-  if (contest.teams.includes(team._id)) {
+  // Check if the team name already exists in the contest's teams list
+  if (contest.teams.some((entry) => entry.team === teamName)) {
     return res.status(400).json({
       status: 'fail',
       message: 'Team is already registered for the contest'
     });
   }
 
-  // Add the team's ID to the teams list in the contest
-  contest.teams.push(team._id);
+  // Add the team's name to the teams list in the contest
+  contest.teams.push({
+    team: teamName,
+    sessionId: team.sessionId,
+    numberOfSolvedProblems: 0,
+    submittedProblems: []
+  });
+
   await contest.save();
 
   res.status(201).json({
@@ -163,30 +171,33 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
   });
 });
 
-exports.submitContestsProblem = catchAsync(async (req,res) => {
-  const { contestId, teamName , status } = req.body;
-  const contest = await Contest.findById(contestId);
-  const team = await contest.teams.findOne(team => team.teamName === teamName);
-  const problemId = req.params.problemId ; 
-  const user = req.user;
 
-  if(!problem){
-    return res.status(404).json({ message: 'problem not found' });
-  }
+
+exports.submitContestsProblem = catchAsync(async (req,res) => {
   
+  const {contestId , status , teamName} = req.body;
+  
+  const problemId = req.params.id;
+
+  const team = await Team.findOne({teamName});
   if (!team) {
     return res.status(404).json({ message: 'Team not found' });
   }
 
-  const isProblemSubmitted = team.submittedProblems.includes(problemId);
+  const contest = await Contest.findById(contestId);
+  if(!contest.problems.includes(problemId)){
+    return res.status(404).json({ message: 'problem not found in contest' });
+  }
+  
+  const user = req.user;
 
-  if(team.teamMembers.includes(user.userId) && status === 'Accepted' && !isProblemSubmitted){
+  if(team.teamMembers.includes(user.userId) && status === 'Accepted'){
     team.numberOfSolvedProblems ++;
     team.submittedProblems.push(problemId);
+    await team.save();
     res.status(200).json({ message: 'Problem submitted successfully' });
   }
-
-  await team.save();
+  res.status(400).json({ message: 'invalid submission' });
 
 
 });

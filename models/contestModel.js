@@ -16,12 +16,12 @@ const contestSchema = new Schema({
         required: true
     },
     users: [{
-        type: [Schema.Types.ObjectId],
+        type: String,
         ref: 'User'
     }],
-    teams: {
-        teamName : {
-            type:   String,
+    teams: [{
+        team : {
+            type:  String,
             ref: 'Team'
        }, 
        sessionId : {
@@ -31,27 +31,22 @@ const contestSchema = new Schema({
         type : Number
        },
        submittedProblems : [{
-        problemId :{
-            type : String,
-            ref : 'Problem'
-        }
-       }]
-           },       
-    problems: {
-        type: [Schema.Types.ObjectId],
+        type: String,
         ref: 'Problem'
-    },
-    indvidualStanding: {
-        type: [Schema.Types.ObjectId],
+       }]
+    }],
+    problems: [{
+        type: String,
+        ref: 'Problem'
+    }],
+    indvidualStanding: [{
+        type: String,
         ref: 'User'
-    },
+    }],
     teamStanding: {
-        type: [Schema.Types.ObjectId],
+        type: String,
         ref: 'Team'
-    },
-    sessionId: {
-        type: String
-     }
+    }
 });
 
 const Contest = mongoose.model('Contest', contestSchema);
