@@ -173,3 +173,26 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
   });
 });
 
+exports.teamStanding = catchAsync(async (req,res) => {
+  const contest = await Contest.findById(req.params.id);
+  // Sort the teams based on numberOfSolvedProblems in descending order
+  const sortedTeams = contest.teams.sort((a, b) => b.numberOfSolvedProblems - a.numberOfSolvedProblems);
+
+  // Map the sorted teams to only include team names
+  const rankedTeamNames = sortedTeams.map(team => team.teamName);
+
+  // Update the teamStanding array with the ranked team names
+  contest.teamStanding = rankedTeamNames;
+
+  // Save the changes to the contest
+  await contest.save();
+
+  res.status(201).json({
+    status: 'success',
+    data: 
+      contest.teamStanding
+    
+  });
+
+})
+
