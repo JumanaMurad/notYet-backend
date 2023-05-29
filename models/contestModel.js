@@ -20,7 +20,7 @@ const contestSchema = new Schema({
         ref: 'User'
     }],
     teams: [{
-        team : {
+        teamName : {
             type:  String,
             ref: 'Team'
        }, 
@@ -28,7 +28,8 @@ const contestSchema = new Schema({
         type : String
        },
        numberOfSolvedProblems : {
-        type : Number
+        type : Number,
+        default: 0
        },
        submittedProblems : [{
         type: String,

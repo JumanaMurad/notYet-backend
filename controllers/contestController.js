@@ -155,7 +155,7 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
 
   // Add the team's name to the teams list in the contest
   contest.teams.push({
-    team: teamName,
+    teamName: teamName,
     sessionId: team.sessionId,
     numberOfSolvedProblems: 0,
     submittedProblems: []
@@ -171,33 +171,3 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
   });
 });
 
-
-
-exports.submitContestsProblem = catchAsync(async (req,res) => {
-  
-  const {contestId , status , teamName} = req.body;
-  
-  const problemId = req.params.id;
-
-  const team = await Team.findOne({teamName});
-  if (!team) {
-    return res.status(404).json({ message: 'Team not found' });
-  }
-
-  const contest = await Contest.findById(contestId);
-  if(!contest.problems.includes(problemId)){
-    return res.status(404).json({ message: 'problem not found in contest' });
-  }
-  
-  const user = req.user;
-
-  if(team.teamMembers.includes(user.userId) && status === 'Accepted'){
-    team.numberOfSolvedProblems ++;
-    team.submittedProblems.push(problemId);
-    await team.save();
-    res.status(200).json({ message: 'Problem submitted successfully' });
-  }
-  res.status(400).json({ message: 'invalid submission' });
-
-
-});

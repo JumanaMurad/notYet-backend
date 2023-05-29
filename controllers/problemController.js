@@ -3,6 +3,8 @@ const AppError = require('./../utils/appError');
 const catchAsync = require('./../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
 const User = require('../models/userModel');
+const Team = require('../models/teamModel');
+const Contest = require('../models/ContestModel');
 
 exports.getAllProblems = catchAsync(async (req, res) => {
 
@@ -130,5 +132,65 @@ exports.submitProblem = catchAsync(async (req, res) => {
     }
   });
   
+
+  exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
+    const { contestId, teamName, status } = req.body;
+    const submittedProblem = await Problem.findById(req.params.id); // Retrieve problem ID from req.params
   
+    // Find the contest object
+    const contest = await Contest.findById(contestId);
+    if (!contest) {
+      return res.status(404).json({ message: 'Contest not found' });
+    }
+  
+    // Find the team object within the list of teams included in the contest
+    const team = contest.teams.find((teamObj) => teamObj.teamName === teamName);
+    console.log(team);
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found in contest' });
+    }
+  
+    // Find the problem based on the title in the contest
+    const problem = contest.problems.find((problem) => problem.toLowerCase() === submittedProblem.title.toLowerCase());
+    if (!problem) {
+      return res.status(404).json({ message: 'Problem not found in contest' });
+    }
+  
+    // Check if the user is a member of the team and the status is 'Accepted'
+    if (status === 'Accepted') {
+      // Increment the number of solved problems in the team
+      if (!isNaN(team.numberOfSolvedProblems)) {
+        team.numberOfSolvedProblems = parseInt(team.numberOfSolvedProblems) + 1;
+      } else {
+        team.numberOfSolvedProblems = 1;
+      }
+  
+      console.log('Previous numberOfSolvedProblems:', team.numberOfSolvedProblems);
+  
+      // Initialize submittedProblems array if undefined in the team object
+      if (!team.submittedProblems) {
+        team.submittedProblems = [];
+      }
+  
+      team.submittedProblems.push(submittedProblem.title); // Push the problem's title to the team's submittedProblems array
+  
+      console.log('Updated numberOfSolvedProblems:', team.numberOfSolvedProblems);
+  
+      // Update the team's solved problems count and submitted problems array within the contest object
+      await Contest.updateOne(
+        { _id: contest._id, 'teams.teamName': teamName },
+        {
+          $inc: { 'teams.$.numberOfSolvedProblems': 1 },
+          $push: { 'teams.$.submittedProblems': problem.title }, // Push the problem's title to the team's submittedProblems array
+        }
+      );
+  
+      res.status(200).json({ message: 'Problem submitted successfully' });
+    } else {
+      res.status(400).json({ message: 'Invalid submission' });
+    }
+  });
+  
+
+ //team.teamMembers.includes(user.username) &&    
   
