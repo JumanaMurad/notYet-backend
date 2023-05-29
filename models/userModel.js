@@ -60,7 +60,7 @@ const UserSchema = new Schema({
    },
    submittedProblems :[{
       problem: {
-         type: Schema.Types.ObjectId,
+         type: String,
          ref: 'Problem',
          required: true
       },

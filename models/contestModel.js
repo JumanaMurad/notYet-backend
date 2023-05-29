@@ -44,10 +44,10 @@ const contestSchema = new Schema({
         type: String,
         ref: 'User'
     }],
-    teamStanding: {
+    teamStanding: [{
         type: String,
         ref: 'Team'
-    }
+    }]
 });
 
 const Contest = mongoose.model('Contest', contestSchema);

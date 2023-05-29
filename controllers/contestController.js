@@ -1,4 +1,4 @@
-const Contest = require('../models/ContestModel');
+const Contest = require('../models/contestModel');
 const Team = require('../models/teamModel');
 const User = require('../models/userModel')
 const Problem = require('../models/problemModel')
@@ -107,8 +107,10 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     });
   }
 
-  // Add the user's username to the users list in the contest
+  // Add the user's username to the users list and indvidual standing list in the contest
   contest.users.push(user.username);
+  contest.indvidualStanding.push(user.username);
+
   await contest.save();
 
   res.status(201).json({
@@ -118,7 +120,6 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     }
   });
 });
-
 
 
 exports.registerTeamForContest = catchAsync(async (req, res) => {
@@ -160,8 +161,9 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
     numberOfSolvedProblems: 0,
     submittedProblems: []
   });
+  contest.teamStanding.push()
 
-  await contest.save();
+  await contest.save(team.teamName);
 
   res.status(201).json({
     status: 'success',
