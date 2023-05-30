@@ -130,7 +130,8 @@ exports.deleteProblem = catchAsync(async (req, res) => {
 //   }
 // });
 exports.submitProblem = catchAsync(async (req, res) => {
-  const { status, username } = req.body;
+  const status = req.body.status;
+  const username = req.user.username;
   const problemId = req.params.id;
 
   try {
