@@ -163,10 +163,6 @@ exports.submitProblem = catchAsync(async (req, res) => {
   }
 });
 
-
-
-
-
 exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
   const { contestId, teamName, status } = req.body;
   const submittedProblem = await Problem.findById(req.params.id); // Retrieve problem ID from req.params
@@ -225,6 +221,42 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
   }
 });
 
+exports.userSubmitContestProblem = catchAsync (async (req,res) => {
+  const { status, contestId } = req.body;
+  const problemId = req.params.id;
+
+  const contest = await Contest.findById(contestId);
+  if (!contest) {
+    return res.status(404).json({ message: 'Contest not found' });
+  }
+
+  const user = contest.users.find((obj) => obj.userName === req.user.user);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  
+  const problem = await Problem.findById(problemId);
+  if (!problem) {
+    return res.status(404).json({ message: 'problem not found' });
+}
+
+  if (status === 'Accepted') {
+    // Increment the number of solved problems in the team
+    if (!isNaN(user.numberOfSolvedProblems)) {
+      user.numberOfSolvedProblems = parseInt(user.numberOfSolvedProblems) + 1;
+    } else {
+      user.numberOfSolvedProblems = 1;
+  } }
+
+  await contest.save();
+
+  res.status(201).json({
+    status: 'success',
+    data: 
+      contest  
+  });
+
+});
+
 
  //team.teamMembers.includes(user.username) &&    
-

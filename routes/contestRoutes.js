@@ -22,6 +22,8 @@ router
 
 router.patch('/team-standing/:id', authController.protect ,contestController.teamStanding);
 
+router.patch('/individual-standing/:id', authController.protect ,contestController.individualStanding);
+
 
 /* router
     .route('/')
