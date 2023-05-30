@@ -12,15 +12,24 @@ const filterObj = (obj, ...allowedFields)=>{
 }
 
 exports.getAllUsers = catchAsync(async (req,res) => {
-  const users = await User.find()
-  .exec()
-  .then(users=>
+  
+  // EXECUTE A QUERY
+  const features = new APIFeatures(User.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const users = await features.query
+
+  if (!users) {
+    return next(new AppError('not found', 404))
+  }
     res.status(200).json({
       status: 'success',
       results: users.length,
       data: users,
-    })
-    );       
+    });      
 }
 );
 

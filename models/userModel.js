@@ -83,7 +83,8 @@ const UserSchema = new Schema({
    },
    profilePic:
    {
-      type: String
+      type: String,
+      default: "https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png"
    },
    joinedTeams: [{
       type: String,

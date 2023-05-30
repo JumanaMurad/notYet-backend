@@ -14,6 +14,7 @@ exports.getAllProblems = catchAsync(async (req, res) => {
     .sort()
     .limitFields()
     .paginate();
+    
   const problems = await features.query;
   if (!problems) {
     return next(new AppError('not found', 404))
@@ -141,7 +142,7 @@ exports.submitProblem = catchAsync(async (req, res) => {
     }
 
     user.submittedProblems.push({
-      problem: problem.title, // Store problem title instead of ID
+      problem: problem.title, // Store problem title
       status: status || 'Pending',
     });
 
@@ -225,6 +226,5 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
   }
 });
 
-
- //team.teamMembers.includes(user.username) &&    
+ //validate the the user submitting is in team  
 
