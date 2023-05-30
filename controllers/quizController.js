@@ -1,7 +1,9 @@
 const Quiz = require('../models/quizModel');
+const catchAsync = require('../utils/catchAsync');
 
-exports.getAllQuizes = async (req, res) => {
-    try{
+exports.getAllQuizes = catchAsync(
+    async (req, res) => {
+   
         const quizes = await Quiz.find();
 
         res.status(200).json({
@@ -11,13 +13,9 @@ exports.getAllQuizes = async (req, res) => {
                 quizes
             }
         });
-    } catch (err) {
-        res.status(400).json({
-            status: 'fail',
-            message: err
-        })
-    }
+    
 }
+);
 
 exports.getQuiz = async (req, res) => {
     try{

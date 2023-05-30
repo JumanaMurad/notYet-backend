@@ -76,12 +76,13 @@ exports.deleteContest = catchAsync(async (req, res) => {
 
 
 exports.registerUserForContest = catchAsync(async (req, res) => {
-  const { username } = req.body;
+  const username = req.user.username;
   const contestId = req.params.id;
 
   // Find the contest
   const contest = await Contest.findById(contestId);
 
+  // Check if the contest already exists
   if (!contest) {
     return res.status(404).json({
       status: 'fail',
@@ -100,7 +101,7 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
   }
 
   // Check if the user's username already exists in the contest's users list
-  if (contest.users.includes(user.username)) {
+  if (contest.users.includes(username)) {
     return res.status(400).json({
       status: 'fail',
       message: 'User is already registered for the contest'
@@ -108,8 +109,11 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
   }
 
   // Add the user's username to the users list and indvidual standing list in the contest
-  contest.users.push(user.username);
-  contest.indvidualStanding.push(user.username);
+  contest.individualStanding.push(username);
+  contest.users.push({
+    userName: username,
+    numberOfSolvedProblems: 0
+  });
 
   await contest.save();
 
