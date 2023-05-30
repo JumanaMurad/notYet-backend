@@ -40,4 +40,6 @@ router.patch(
 
 router.patch('/submit-contest-problem/:id',authController.protect , problemsController.teamSubmitContestsProblem);
 
+router.patch('/user-submit-contest-problem/:id',authController.protect , problemsController.userSubmitContestProblem);
+
 module.exports = router;

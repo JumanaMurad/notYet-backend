@@ -16,8 +16,14 @@ const contestSchema = new Schema({
         required: true
     },
     users: [{
-        type: String,
-        ref: 'User'
+        userName : {
+            type: String,
+            ref: 'User' 
+    },
+        numberOfSolvedProblems : {
+            type : Number,
+            default: 0
+           },
     }],
     teams: [{
         teamName : {
@@ -40,7 +46,7 @@ const contestSchema = new Schema({
         type: String,
         ref: 'Problem'
     }],
-    indvidualStanding: [{
+    individualStanding: [{
         type: String,
         ref: 'User'
     }],
