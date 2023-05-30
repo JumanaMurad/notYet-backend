@@ -230,15 +230,19 @@ exports.userSubmitContestProblem = catchAsync (async (req,res) => {
     return res.status(404).json({ message: 'Contest not found' });
   }
 
-  const user = contest.users.find((obj) => obj.userName === req.user.user);
+  const user = contest.users.find((obj) => obj.userName === req.user.username);
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
   }
   
   const problem = await Problem.findById(problemId);
-  if (!problem) {
+
+  
+  if (!problem || !contest.problems.includes(problemId)) {
     return res.status(404).json({ message: 'problem not found' });
 }
+
+
 
   if (status === 'Accepted') {
     // Increment the number of solved problems in the team
