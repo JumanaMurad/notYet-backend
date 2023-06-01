@@ -93,13 +93,13 @@ exports.deleteQuiz = async (req, res) => {
 }
 
 exports.createQuiz = catchAsync(async (req,res)=> {
-    const easyQuestions = await Question.aggregate([{ $sample: { size: 2 } }]);
+    const easyQuestions = await Question.aggregate([{ $match: { difficulty: 'easy' } }, { $sample: { size: 2 } }]);
     const easyQuestionIds = easyQuestions.map((question) => question._id);
     
-    const mediumQuestions = await Question.aggregate([{ $sample: { size: 1} }]);
+    const mediumQuestions = await Question.aggregate([{ $match: { difficulty: 'medium' } }, { $sample: { size: 2 } }]);
     const mediumQuestionIds = mediumQuestions.map((question) => question._id);
 
-    const hardQuestions = await Question.aggregate([{ $sample: { size: 1 } }]);
+    const hardQuestions = await Question.aggregate([{ $match: { difficulty: 'hard' } }, { $sample: { size: 2 } }]);
     const hardQuestionIds = hardQuestions.map((question) => question._id);
 
     if(!easyQuestions || !mediumQuestions || !hardQuestions){
