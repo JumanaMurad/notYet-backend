@@ -70,6 +70,10 @@ const UserSchema = new Schema({
          default: 'Pending'
       }
    }],
+   quizEvaluation :{
+      type : Number,
+      default : 0
+   },
    contest : {
       type: [Schema.Types.ObjectId],
       ref: 'Contest'
