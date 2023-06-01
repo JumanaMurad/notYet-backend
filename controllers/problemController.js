@@ -129,21 +129,21 @@ exports.deleteProblem = catchAsync(async (req, res) => {
 //     res.status(500).json({ message: 'Internal server error' });
 //   }
 // });
+
 exports.submitProblem = catchAsync(async (req, res) => {
   const status = req.body.status;
-  const username = req.user.username;
+  const userId = req.user._id;
   const problemId = req.params.id;
 
-  try {
     const problem = await Problem.findById(problemId);
-    const user = await User.findOne({ username });
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     user.submittedProblems.push({
-      problem: problem.title, // Store problem title
+      problem: problem._id, // Store problem title
       status: status || 'Pending',
     });
 
@@ -155,18 +155,14 @@ exports.submitProblem = catchAsync(async (req, res) => {
       }
     }
 
-    await User.updateOne({ username }, user);
+    await User.updateOne({ userId }, user);
     await Problem.updateOne({ _id: problemId }, problem);
 
     res.status(200).json({ message: 'Problem submitted successfully' });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
 });
 
 exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
-  const { contestId, teamName, status } = req.body;
+  const { contestId, teamId, status } = req.body;
   const submittedProblem = await Problem.findById(req.params.id); // Retrieve problem ID from req.params
 
   // Find the contest object
@@ -176,7 +172,7 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
   }
 
   // Find the team object within the list of teams included in the contest
-  const team = contest.teams.find((teamObj) => teamObj.teamName === teamName);
+  const team = contest.teams.find((teamObj) => teamObj._id === teamId);
   console.log(team);
   if (!team) {
     return res.status(404).json({ message: 'Team not found in contest' });
@@ -210,7 +206,7 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
 
     // Update the team's solved problems count and submitted problems array within the contest object
     await Contest.updateOne(
-      { _id: contest._id, 'teams.teamName': teamName },
+      { _id: contest._id, 'teams.teamId': teamId },
       {
         $inc: { 'teams.$.numberOfSolvedProblems': 1 },
         $push: { 'teams.$.submittedProblems': submittedProblem.title }, // Push the problem's title to the team's submittedProblems array
@@ -223,9 +219,9 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
   }
 });
 
- //validate the the user submitting is in team  
+//validate the the user submitting is in team  
 
-exports.userSubmitContestProblem = catchAsync (async (req,res) => {
+exports.userSubmitContestProblem = catchAsync(async (req, res) => {
   const { status, contestId } = req.body;
   const problemId = req.params.id;
 
@@ -238,13 +234,13 @@ exports.userSubmitContestProblem = catchAsync (async (req,res) => {
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
   }
-  
+
   const problem = await Problem.findById(problemId);
 
-  
+
   if (!problem || !contest.problems.includes(problemId)) {
     return res.status(404).json({ message: 'problem not found' });
-}
+  }
 
 
 
@@ -254,17 +250,17 @@ exports.userSubmitContestProblem = catchAsync (async (req,res) => {
       user.numberOfSolvedProblems = parseInt(user.numberOfSolvedProblems) + 1;
     } else {
       user.numberOfSolvedProblems = 1;
-  } }
+    }
+  }
 
   await contest.save();
 
   res.status(201).json({
     status: 'success',
-    data: 
-      contest  
+    data:
+      contest
   });
 
 });
 
-
- //team.teamMembers.includes(user.username) &&    
+ // team.teamMembers.includes(req.user._id) &&  

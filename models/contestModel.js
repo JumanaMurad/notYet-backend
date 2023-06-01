@@ -16,8 +16,8 @@ const contestSchema = new Schema({
         required: true
     },
     users: [{
-        userName : {
-            type: String,
+        userId : {
+            type: Schema.Types.ObjectId,
             ref: 'User' 
     },
         numberOfSolvedProblems : {
@@ -26,8 +26,8 @@ const contestSchema = new Schema({
            },
     }],
     teams: [{
-        teamName : {
-            type:  String,
+        teamId : {
+            type:  Schema.Types.ObjectId,
             ref: 'Team'
        }, 
        sessionId : {
@@ -38,20 +38,20 @@ const contestSchema = new Schema({
         default: 0
        },
        submittedProblems : [{
-        type: String,
+        type: Schema.Types.ObjectId,
         ref: 'Problem'
        }]
     }],
     problems: [{
-        type: String,
+        type: Schema.Types.ObjectId,
         ref: 'Problem'
     }],
     individualStanding: [{
-        type: String,
+        type: Schema.Types.ObjectId,
         ref: 'User'
     }],
     teamStanding: [{
-        type: String,
+        type: Schema.Types.ObjectId,
         ref: 'Team'
     }]
 });
