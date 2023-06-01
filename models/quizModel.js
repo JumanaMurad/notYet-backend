@@ -9,10 +9,20 @@ const quizSchema = mongoose.Schema({
       },
       questionIds: [
         {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Question'
+          question : 
+          {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'Question' 
+          },
+          solved :
+          {
+            type : Boolean,
+            default : false
+          }
+
         }
-      ]
+      ],
+      
     }
   ]
 });
