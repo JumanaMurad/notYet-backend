@@ -42,11 +42,11 @@ const problemSchema = new Schema({
      },
      // Consider it to be easier for hard delete
      contests: {
-      type: Schema.Types.ObjectId,
+      type: [Schema.Types.ObjectId],
       ref: 'Contest'
      },
      users: {
-      type: Schema.Types.ObjectId,
+      type: [Schema.Types.ObjectId],
       ref: 'User'
      }
 });

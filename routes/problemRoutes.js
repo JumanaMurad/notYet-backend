@@ -44,10 +44,14 @@ router.patch(
   problemsController.teamSubmitContestsProblem
 );
 
+//router.get('/get-names', authController.protect, problemsController.getProblemNames);
+
 router.patch(
   "/user-submit-contest-problem/:id",
   authController.protect,
   problemsController.userSubmitContestProblem
 );
+
+//router.post('/submit', authController.protect, problemsController.submit);
 
 module.exports = router;

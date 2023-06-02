@@ -38,7 +38,19 @@ const teamSchema = new Schema({
    contests: {
       type: [Schema.Types.ObjectId],
       ref: 'Contest'
-   }
+   },
+   submittedProblems :[{
+      problem: {
+         type: String,
+         ref: 'Problem',
+         required: true
+      },
+      status: {
+         type: String,
+         enum: ['Pending', 'Accepted', 'Wrong Answer', 'Compilation Error', 'Runtime Error', 'Time Limit Exceeded', 'Memory Limit Exceeded'],
+         default: 'Pending'
+      }
+   }]
 }
 );
 

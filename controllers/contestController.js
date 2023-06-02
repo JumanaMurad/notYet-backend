@@ -34,18 +34,41 @@ exports.getContest = catchAsync(async (req, res) => {
 
 });
 
-
 exports.createContest = catchAsync(async (req, res) => {
-  const newContest = await Contest.create(req.body);
+  const { name, startTime, endTime, problems } = req.body;
+
+  // Check if the problems' IDs exist
+  const existingProblems = await Problem.find({ _id: { $in: problems } });
+
+  // Check if all the problems' IDs were found
+  if (existingProblems.length !== problems.length) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'One or more problems do not exist',
+    });
+  }
+
+  // Create the contest
+  const newContest = await Contest.create({
+    name,
+    startTime,
+    endTime,
+    problems,
+  });
+
+  // Update the contest ID in the contest list of each problem
+  await Problem.updateMany(
+    { _id: { $in: problems } },
+    { $push: { contests: newContest._id } }
+  );
 
   res.status(201).json({
-    status: 'sucess',
+    status: 'success',
     data: {
-      tour: newContest,
+      contest: newContest,
     },
   });
-}
-);
+});
 
 
 exports.updateContest = catchAsync(async (req, res) => {
@@ -74,7 +97,6 @@ exports.updateContest = catchAsync(async (req, res) => {
     },
   });
 });
-
 
 
 exports.deleteContest = catchAsync(async (req, res) => {
@@ -150,8 +172,6 @@ if (isUserRegistered) {
     },
   });
 });
-
-
 
 
 exports.registerTeamForContest = catchAsync(async (req, res) => {
@@ -244,6 +264,7 @@ exports.teamStanding = catchAsync(async (req, res) => {
   });
 
 });
+
 
 exports.individualStanding = catchAsync(async (req, res) => {
   const contest = await Contest.findById(req.params.id).populate('users', 'userName numberOfSolvedProblems');;
