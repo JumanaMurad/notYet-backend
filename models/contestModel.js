@@ -37,7 +37,7 @@ const contestSchema = new Schema({
         type : Number,
         default: 0
        },
-       submittedProblems : [{
+       solvedProblems : [{
         type: Schema.Types.ObjectId,
         ref: 'Problem'
        }]
