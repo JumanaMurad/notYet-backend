@@ -1,22 +1,27 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const quizSchema = mongoose.Schema({
   questions: [
     {
       difficulty: {
         type: String,
-        enum: ['easy', 'medium', 'hard']
+        enum: ["easy", "medium", "hard"],
       },
       questionIds: [
         {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Question'
-        }
-      ]
-    }
-  ]
+          question: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Question",
+          },
+          solved: {
+            type: Boolean,
+            default: false,
+          },
+        },
+      ],
+    },
+  ],
 });
 
-const Quiz = new mongoose.model('Quiz', quizSchema);
-
+const Quiz = new mongoose.model("Quiz", quizSchema);
 module.exports = Quiz;

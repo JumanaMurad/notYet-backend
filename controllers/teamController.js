@@ -1,6 +1,6 @@
 const Team = require("../models/teamModel");
-const User = require('../models/userModel');
-const catchAsync = require('./../utils/catchAsync');
+const User = require("../models/userModel");
+const catchAsync = require("./../utils/catchAsync");
 const sendEmail = require("../utils/email");
 
 exports.getAllTeams = catchAsync(async (req, res) => {
@@ -12,20 +12,17 @@ exports.getAllTeams = catchAsync(async (req, res) => {
       teams,
     },
   });
-}
-);
+});
 
-exports.getTeam = catchAsync( async (req, res) => {
+exports.getTeam = catchAsync(async (req, res) => {
   const team = await Team.findOne({ _id: req.params.id });
   res.status(200).json({
     status: "success",
     data: {
       team,
-
     },
   });
-}
-);
+});
 
 exports.createTeam = catchAsync(async (req, res) => {
   const { teamName, teamMembers } = req.body;
@@ -36,13 +33,13 @@ exports.createTeam = catchAsync(async (req, res) => {
   const pendingMembers = [];
 
   // Add the team leader (current user) to the team members array
-  teamLeader.push({ user: userId, role: 'team-leader' });
+  teamLeader.push({ user: userId, role: "team-leader" });
 
   // Loop over the teamMembers array and extract the user IDs
   if (teamMembers && Array.isArray(teamMembers)) {
     for (const member of teamMembers) {
       const username = member.user;
-      pendingMembers.push({ user: username, role: 'member' });
+      pendingMembers.push({ user: username, role: "member" });
     }
   }
 
@@ -50,30 +47,32 @@ exports.createTeam = catchAsync(async (req, res) => {
   const newTeam = await Team.create({
     teamName,
     teamMembers: teamLeader,
-    pendingMembers
+    pendingMembers,
   });
 
   // Add team name to the joinedTeams array for the team leader
   const user = await User.findByIdAndUpdate(userId, {
-    $push: { joinedTeams: newTeam.teamName }
+    $push: { joinedTeams: newTeam.teamName },
   });
 
   // Add team name to the pendingTeams array for each team member
   for (const member of teamMembers) {
     const username = member.user;
-    await User.findOneAndUpdate({ username }, {
-      $push: { pendingTeams: newTeam.teamName }
-    });
+    await User.findOneAndUpdate(
+      { username },
+      {
+        $push: { pendingTeams: newTeam.teamName },
+      }
+    );
   }
 
   res.status(201).json({
-    status: 'success',
+    status: "success",
     data: {
-      newTeam
-    }
+      newTeam,
+    },
   });
 });
-
 
 exports.addTeamMember = catchAsync(async (req, res) => {
   const { teamName, username } = req.body;
@@ -83,16 +82,16 @@ exports.addTeamMember = catchAsync(async (req, res) => {
 
   if (!team) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'Team not found',
+      status: "fail",
+      message: "Team not found",
     });
   }
 
   // Check if the team has reached the maximum capacity
   if (team.teamMembers.length + team.pendingMembers.length >= 3) {
     return res.status(400).json({
-      status: 'fail',
-      message: 'Team is full. Cannot add more members',
+      status: "fail",
+      message: "Team is full. Cannot add more members",
     });
   }
 
@@ -101,8 +100,8 @@ exports.addTeamMember = catchAsync(async (req, res) => {
 
   if (!user) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'User not found',
+      status: "fail",
+      message: "User not found",
     });
   }
 
@@ -116,19 +115,22 @@ exports.addTeamMember = catchAsync(async (req, res) => {
 
   if (isTeamMember || isPendingMember) {
     return res.status(400).json({
-      status: 'fail',
-      message: 'User is already a team member or pending member',
+      status: "fail",
+      message: "User is already a team member or pending member",
     });
   }
 
   // Add team name to the pendingTeams array for the user
-  await User.findOneAndUpdate({ username }, {
-    $push: { pendingTeams: team.teamName }
-  });
+  await User.findOneAndUpdate(
+    { username },
+    {
+      $push: { pendingTeams: team.teamName },
+    }
+  );
 
   const acceptUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
   const rejectUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
- 
+
   await sendEmail({
     email: user.email,
     subject: `NOT YET ! TEAM INVITATION.`,
@@ -143,7 +145,7 @@ exports.addTeamMember = catchAsync(async (req, res) => {
   // Create a new team member object
   const newTeamMember = {
     user: user.username,
-    role: 'member',
+    role: "member",
   };
 
   // Always add the team member pendingMembers
@@ -152,33 +154,34 @@ exports.addTeamMember = catchAsync(async (req, res) => {
   await team.save();
 
   res.status(200).json({
-    status: 'success',
-    message: 'Team member added successfully',
+    status: "success",
+    message: "Team member added successfully",
     data: {
       team,
     },
   });
 });
 
-
 exports.joinTeam = catchAsync(async (req, res) => {
   const { teamName, username } = req.body;
 
   // Find the team by teamName
   const team = await Team.findOne({ teamName });
-  const teamLeader = team.teamMembers.find(member => member.role === 'team-leader');
+  const teamLeader = team.teamMembers.find(
+    (member) => member.role === "team-leader"
+  );
   if (!team) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'Team not found',
+      status: "fail",
+      message: "Team not found",
     });
   }
 
   // Check if the team has reached the maximum capacity
   if (team.teamMembers.length + team.pendingMembers.length >= 3) {
     return res.status(400).json({
-      status: 'fail',
-      message: 'Team is full. Cannot add more members',
+      status: "fail",
+      message: "Team is full. Cannot add more members",
     });
   }
 
@@ -187,8 +190,8 @@ exports.joinTeam = catchAsync(async (req, res) => {
 
   if (!user) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'User not found',
+      status: "fail",
+      message: "User not found",
     });
   }
 
@@ -202,51 +205,53 @@ exports.joinTeam = catchAsync(async (req, res) => {
 
   if (isTeamMember || isPendingMember) {
     return res.status(400).json({
-      status: 'fail',
-      message: 'You are already a team member or pending member',
+      status: "fail",
+      message: "You are already a team member or pending member",
     });
   }
 
   //edit fel urls dol a hussein
   const acceptUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
   const rejectUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
- 
-  await sendEmail({
-    email: teamLeader.email,
-    subject: "A new user watns to join your team.",
-    message: `<p>Hello ${teamLeader.username},</p>
-    <p>A new user, ${user.username}, has requested to join your team, ${team.teamName}.</p>
-    <p>Do you want to accept or reject this request?</p>
-    <a href="${acceptUrl}"><button style="background-color: green; color: white; padding: 10px;">Yes</button></a>
-    <a href="${rejectUrl}"><button style="background-color: red; color: white; padding: 10px;">No</button></a>
-    `,
-  });
+
+  // await sendEmail({
+  //   email: teamLeader.email,
+  //   subject: "A new user watns to join your team.",
+  //   message: `<p>Hello ${teamLeader.username},</p>
+  //   <p>A new user, ${user.username}, has requested to join your team, ${team.teamName}.</p>
+  //   <p>Do you want to accept or reject this request?</p>
+  //   <a href="${acceptUrl}"><button style="background-color: green; color: white; padding: 10px;">Yes</button></a>
+  //   <a href="${rejectUrl}"><button style="background-color: red; color: white; padding: 10px;">No</button></a>
+  //   `,
+  // });
 
   // Create a new team member object
   const newTeamMember = {
     user: user.username,
-    role: 'member',
+    role: "member",
   };
 
   // Always add the team member pendingMembers
   team.pendingMembers.push(newTeamMember);
 
   // Add team name to the pendingTeams array for the user
-  await User.findOneAndUpdate({ username }, {
-    $push: { pendingTeams: team.teamName }
-  });
+  await User.findOneAndUpdate(
+    { username },
+    {
+      $push: { pendingTeams: team.teamName },
+    }
+  );
 
   await team.save();
 
   res.status(200).json({
-    status: 'success',
-    message: 'Request sent successfully',
+    status: "success",
+    message: "Request sent successfully",
     data: {
       team,
     },
   });
 });
-
 
 exports.deleteTeam = catchAsync(async (req, res) => {
   const teamId = req.params.id;
@@ -256,8 +261,8 @@ exports.deleteTeam = catchAsync(async (req, res) => {
 
   if (!team) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'Team not found'
+      status: "fail",
+      message: "Team not found",
     });
   }
 
@@ -277,8 +282,8 @@ exports.deleteTeam = catchAsync(async (req, res) => {
   await team.remove();
 
   res.status(200).json({
-    status: 'success',
-    message: 'Team deleted successfully'
+    status: "success",
+    message: "Team deleted successfully",
   });
 });
 
@@ -291,8 +296,8 @@ exports.editTeamName = catchAsync(async (req, res) => {
 
   if (!team) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'Team not found',
+      status: "fail",
+      message: "Team not found",
     });
   }
 
@@ -301,7 +306,7 @@ exports.editTeamName = catchAsync(async (req, res) => {
   await team.save();
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
       team,
     },
@@ -309,55 +314,44 @@ exports.editTeamName = catchAsync(async (req, res) => {
 });
 
 exports.acceptRequest = catchAsync(async (req, res) => {
-  const { username, teamName } = req.body;
-
-  // Find the team by teamName
-  const team = await Team.findOne({ teamName });
+  const team = await Team.findById(req.params.id);
+  const { username } = req.body;
 
   if (!team) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'Team not found',
+      status: "fail",
+      message: "Team not found",
     });
   }
 
-  // Find the user by username
   const user = await User.findOne({ username });
 
   if (!user) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'User not found',
+      status: "fail",
+      message: "User not found",
     });
   }
 
-  // Check if the user is a pending member of the team
   const pendingMemberIndex = team.pendingMembers.findIndex(
     (member) => member.user === username
   );
 
   if (pendingMemberIndex === -1) {
     return res.status(400).json({
-      status: 'fail',
-      message: 'User is not a pending member of the team',
+      status: "fail",
+      message: "User is not a pending member of the team",
     });
   }
 
-  // Remove the user from the pendingMembers list
   team.pendingMembers.splice(pendingMemberIndex, 1);
+  team.teamMembers.push({ user: username, role: "member" });
 
-  // Add the user to the teamMembers list
-  team.teamMembers.push({ user: username, role: 'member' });
-
-  // Update the team and user models
-  await Promise.all([
-    Team.updateOne({ teamName }, team),
-    User.updateOne({ username }, { $pull: { pendingTeams: teamName }, $push: { joinedTeams: teamName } }),
-  ]);
+  await team.save();
 
   res.status(200).json({
-    status: 'success',
-    message: 'Request accepted successfully',
+    status: "success",
+    message: "Request accepted successfully",
     data: {
       team,
     },
@@ -365,15 +359,13 @@ exports.acceptRequest = catchAsync(async (req, res) => {
 });
 
 exports.rejectRequest = catchAsync(async (req, res) => {
-  const { username, teamName } = req.body;
-
-  // Find the team by teamName
-  const team = await Team.findOne({ teamName });
+  const team = await Team.findById(req.params.id);
+  const { username } = req.body;
 
   if (!team) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'Team not found',
+      status: "fail",
+      message: "Team not found",
     });
   }
 
@@ -382,20 +374,18 @@ exports.rejectRequest = catchAsync(async (req, res) => {
 
   if (!user) {
     return res.status(404).json({
-      status: 'fail',
-      message: 'User not found',
+      status: "fail",
+      message: "User not found",
     });
   }
 
   // Check if the user is a pending member of the team
-  const pendingMemberIndex = team.pendingMembers.findIndex(
-    (member) => member.user === username
-  );
+  const pendingMemberIndex = team.pendingMembers.includes(username);
 
   if (pendingMemberIndex === -1) {
     return res.status(400).json({
-      status: 'fail',
-      message: 'User is not a pending member of the team',
+      status: "fail",
+      message: "User is not a pending member of the team",
     });
   }
 
@@ -403,20 +393,33 @@ exports.rejectRequest = catchAsync(async (req, res) => {
   team.pendingMembers.splice(pendingMemberIndex, 1);
 
   // Remove the team name from the pendingTeams list
-  user.pendingTeams = user.pendingTeams.filter((team) => team !== teamName);
+  user.pendingTeams = user.pendingTeams.filter((team) => team !== team);
 
   // Update the team and user models
-  await Promise.all([
+  /* await Promise.all([
     Team.updateOne({ teamName }, team),
     User.updateOne({ username }, user),
-  ]);
-
+  ]);*/
+  await team.save();
   res.status(200).json({
-    status: 'success',
-    message: 'Request rejected successfully',
+    status: "success",
+    message: "Request rejected successfully",
     data: {
       team,
     },
   });
 });
-
+exports.getPendingRequests = catchAsync(async (req, res) => {
+  const { teamName } = req.body;
+  const team = await Team.findOne({ teamName });
+  if (!team) {
+    return res.status(404).json({
+      message: "Team not found",
+    });
+  }
+  const pendingMembers = team.pendingMembers;
+  res.status(200).json({
+    status: "success",
+    data: { pendingMembers },
+  });
+});
