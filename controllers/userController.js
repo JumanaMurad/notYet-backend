@@ -10,28 +10,27 @@ const filterObj = (obj, ...allowedFields)=>{
   });
   return newObj;
 }
-
-exports.getAllUsers = catchAsync(async (req,res) => {
-  
+exports.getAllUsers = catchAsync(async (req, res) => {
   // EXECUTE A QUERY
-  const features = new APIFeatures(User.find(), req.query)
+  const features = new APIFeatures(User.find({ role: 'user' }), req.query)
     .filter()
     .sort()
     .limitFields()
     .paginate();
 
-  const users = await features.query
+  const users = await features.query;
 
   if (!users) {
-    return next(new AppError('not found', 404))
+    return next(new AppError('not found', 404));
   }
-    res.status(200).json({
-      status: 'success',
-      results: users.length,
-      data: users,
-    });      
-}
-);
+
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    data: users,
+  });
+});
+
 
 exports.getUser = catchAsync(async (req, res) => {
   
