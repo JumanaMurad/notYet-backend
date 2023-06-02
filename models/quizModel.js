@@ -9,24 +9,6 @@ const quizSchema = mongoose.Schema({
       },
       questionIds: [
         {
-<<<<<<< HEAD
-          question : 
-          {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'Question' 
-          },
-          solved :
-          {
-            type : Boolean,
-            default : false
-          }
-
-        }
-      ],
-      
-    }
-  ]
-=======
           question: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Question",
@@ -39,7 +21,6 @@ const quizSchema = mongoose.Schema({
       ],
     },
   ],
->>>>>>> 2a9165c00e9db0262ec20f311c9b3a86bd2c75e6
 });
 
 const Quiz = new mongoose.model("Quiz", quizSchema);
