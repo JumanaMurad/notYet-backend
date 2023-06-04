@@ -12,7 +12,7 @@ const teamSchema = new Schema({
    },
    teamMembers :[{
       user: {
-         type: String,
+         type: Schema.Types.ObjectId,
          ref: 'User',
          required: true
       },
@@ -25,7 +25,7 @@ const teamSchema = new Schema({
    }],
    pendingMembers : [{
       user: {
-         type: String,
+         type: Schema.Types.ObjectId,
          ref: 'User',
          required: true
       },

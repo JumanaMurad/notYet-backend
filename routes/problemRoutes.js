@@ -44,7 +44,7 @@ router.patch(
   problemsController.teamSubmitContestsProblem
 );
 
-//router.get('/get-names', authController.protect, problemsController.getProblemNames);
+router.get('/get', authController.protect, problemsController.getProblemNames);
 
 router.patch(
   "/user-submit-contest-problem/:id",

@@ -22,7 +22,8 @@ router.get('/problems-stats/:id', authController.protect, userController.getUser
 router
   .route('/:id')
   .patch(authController.protect ,userController.updateUser)
-  .delete(authController.protect,userController.deleteUser);
+  .delete(authController.protect,userController.deleteUser)
+  .get(authController.protect, userController.getAUser);
 
 //router.get('/',authController.protect,userController.getUser);
 

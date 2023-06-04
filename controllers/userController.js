@@ -12,24 +12,25 @@ const filterObj = (obj, ...allowedFields)=>{
 }
 exports.getAllUsers = catchAsync(async (req, res) => {
   // EXECUTE A QUERY
-  const features = new APIFeatures(User.find({ role: 'user' }), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
+  try {
+    const features = new APIFeatures(User.find({ role: 'user' }), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
 
-  const users = await features.query;
+    const users = await features.query;
 
-  if (!users) {
-    return next(new AppError('not found', 404));
+    res.status(200).json({
+      status: 'success',
+      results: users.length,
+      data: users,
+    });
+  } catch (error) {
+    return next(new AppError('Error retrieving users', 500));
   }
-
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: users,
-  });
 });
+
 
 
 exports.getUser = catchAsync(async (req, res) => {
@@ -45,6 +46,17 @@ exports.getUser = catchAsync(async (req, res) => {
 
 }
 );
+
+exports.getAUser = catchAsync( async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      user
+    }
+  });
+});
 
 exports.createUser = catchAsync(async (req, res) => {
   const newUser = await User.create(req.body);

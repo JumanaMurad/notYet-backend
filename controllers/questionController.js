@@ -48,7 +48,7 @@ exports.createQuestion = catchAsync(async (req, res) => {
 
 // Update a question by ID
 exports.updateQuestion = catchAsync(async (req, res) => {
-  const question = await Question.findByIDAndUpdate(
+  const question = await Question.findByIdAndUpdate(
     { _id: req.params.id },
     req.body
   );
@@ -66,9 +66,6 @@ exports.deleteQuestion = catchAsync(async (req, res) => {
   const question = await Question.findByIdAndDelete(req.params.id);
 
   res.status(200).json({
-    status: "success",
-    data: {
-      question,
-    },
+    message: "Deleted Successfully"
   });
 });

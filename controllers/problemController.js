@@ -81,20 +81,21 @@ exports.deleteProblem = catchAsync(async (req, res) => {
   });
 });
 
-// exports.getProblemNames = catchAsync(async (req, res) => {
-//   const { problems } = req.body;
-//   console.log(problems)
+exports.getProblemNames = catchAsync(async (req, res) => {
+  const problems = req.body.problems;
+  console.log(problems);
 
-//   const problemTitles = [];
-//   for (const problemId of problems) {
-//     const problem = await Problem.findById(problemId);
-//     if (problem) {
-//       problemTitles.push(problem.title);
-//     }
-//   }
-//   console.log(problemTitles);
-//   res.json(problemTitles);
-// });
+  const problemTitles = [];
+  for (const problemId of problems) {
+    const problem = await Problem.findById(problemId).select('title');
+    if (problem) {
+      problemTitles.push(problem.title);
+    }
+  }
+
+  res.json(problemTitles);
+});
+
 
 
 

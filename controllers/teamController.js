@@ -15,7 +15,7 @@ exports.getAllTeams = catchAsync(async (req, res) => {
 });
 
 exports.getTeam = catchAsync(async (req, res) => {
-  const team = await Team.findOne({ _id: req.params.id });
+  const team = await Team.findById(req.params.id);
   res.status(200).json({
     status: "success",
     data: {
@@ -24,48 +24,56 @@ exports.getTeam = catchAsync(async (req, res) => {
   });
 });
 
+
 exports.createTeam = catchAsync(async (req, res) => {
   const { teamName, teamMembers } = req.body;
-  const userId = req.params.id;
+  const userId = req.user._id;
 
-  // Create an array to store the team members
-  const teamLeader = [];
+  // Create an array to store the team leader
+  const teamLeader = [{ user: userId, role: "team-leader" }];
+
+  // Create an array to store the pending members
   const pendingMembers = [];
 
-  // Add the team leader (current user) to the team members array
-  teamLeader.push({ user: userId, role: "team-leader" });
-
-  // Loop over the teamMembers array and extract the user IDs
+  // Loop over the teamMembers array and find each member by their username
   if (teamMembers && Array.isArray(teamMembers)) {
     for (const member of teamMembers) {
-      const username = member.user;
-      pendingMembers.push({ user: username, role: "member" });
+      // Find the user by their username
+      const user = await User.findOne({ username: member.user });
+
+      // If a user is found, add their ID to the pendingMembers array with the role set to "member"
+      if (user) {
+        pendingMembers.push({ user: user._id, role: "member" });
+      }
     }
   }
 
-  // Create the new team
+  // Create the new team with the provided teamName, teamMembers (containing the team leader), and pendingMembers
   const newTeam = await Team.create({
     teamName,
     teamMembers: teamLeader,
     pendingMembers,
   });
 
-  // Add team name to the joinedTeams array for the team leader
-  const user = await User.findByIdAndUpdate(userId, {
-    $push: { joinedTeams: newTeam.teamName },
+  // Add the team ID to the joinedTeams array for the team leader
+  await User.findByIdAndUpdate(userId, {
+    $push: { joinedTeams: newTeam._id },
   });
 
-  // Add team name to the pendingTeams array for each team member
+  // Loop over the teamMembers array again to find each member by their username
   for (const member of teamMembers) {
-    const username = member.user;
-    await User.findOneAndUpdate(
-      { username },
-      {
-        $push: { pendingTeams: newTeam.teamName },
-      }
-    );
+    // Find the user by their username
+    const user = await User.findOne({ username: member.user });
+
+    // If a user is found, add the team ID to their pendingTeams array
+    if (user) {
+      await User.findByIdAndUpdate(user._id, {
+        $push: { pendingTeams: newTeam._id },
+      });
+    }
   }
 
+  // Respond with a success status and the newTeam object
   res.status(201).json({
     status: "success",
     data: {
@@ -163,13 +171,16 @@ exports.addTeamMember = catchAsync(async (req, res) => {
 });
 
 exports.joinTeam = catchAsync(async (req, res) => {
-  const { teamName, username } = req.body;
+  const teamName = req.body;
+  const userId = req.user._id;
 
   // Find the team by teamName
   const team = await Team.findOne({ teamName });
+
   const teamLeader = team.teamMembers.find(
     (member) => member.role === "team-leader"
   );
+
   if (!team) {
     return res.status(404).json({
       status: "fail",
@@ -186,7 +197,7 @@ exports.joinTeam = catchAsync(async (req, res) => {
   }
 
   // Find the user by username
-  const user = await User.findOne({ username });
+  const user = await User.findById(userId);
 
   if (!user) {
     return res.status(404).json({
@@ -197,10 +208,10 @@ exports.joinTeam = catchAsync(async (req, res) => {
 
   // Check if the user is already a team member or pending member
   const isTeamMember = team.teamMembers.some(
-    (member) => member.user.toString() === user._id.toString()
+    (member) => member.user.toString() === userId.toString()
   );
   const isPendingMember = team.pendingMembers.some(
-    (member) => member.user.toString() === user._id.toString()
+    (member) => member.user.toString() === userId.toString()
   );
 
   if (isTeamMember || isPendingMember) {
@@ -227,7 +238,7 @@ exports.joinTeam = catchAsync(async (req, res) => {
 
   // Create a new team member object
   const newTeamMember = {
-    user: user.username,
+    user: userId,
     role: "member",
   };
 
@@ -235,10 +246,10 @@ exports.joinTeam = catchAsync(async (req, res) => {
   team.pendingMembers.push(newTeamMember);
 
   // Add team name to the pendingTeams array for the user
-  await User.findOneAndUpdate(
-    { username },
+  await User.findByIdAndDelete(
+    { userId },
     {
-      $push: { pendingTeams: team.teamName },
+      $push: { pendingTeams: team._id },
     }
   );
 
