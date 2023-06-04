@@ -60,7 +60,7 @@ const UserSchema = new Schema({
    },
    submittedProblems :[{
       problem: {
-         type: String,
+         type: Schema.Types.ObjectId,
          ref: 'Problem',
          required: true
       },
@@ -91,11 +91,11 @@ const UserSchema = new Schema({
       default: "https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png"
    },
    joinedTeams: [{
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: 'Team'
    }],
    pendingTeams: [{
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: 'Team'
    }]
    }  

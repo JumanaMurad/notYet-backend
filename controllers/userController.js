@@ -12,23 +12,23 @@ const filterObj = (obj, ...allowedFields)=>{
 }
 exports.getAllUsers = catchAsync(async (req, res) => {
   // EXECUTE A QUERY
-  try {
-    const features = new APIFeatures(User.find({ role: 'user' }), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
+  const features = new APIFeatures(User.find({ role: 'user' }), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
 
-    const users = await features.query;
+  const users = await features.query;
 
-    res.status(200).json({
-      status: 'success',
-      results: users.length,
-      data: users,
-    });
-  } catch (error) {
-    return next(new AppError('Error retrieving users', 500));
+  if (!users) {
+    return next(new AppError('not found', 404));
   }
+
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    data: users,
+  });
 });
 
 

@@ -17,22 +17,27 @@ router.patch('/updateMe', authController.protect , userController.updateMe);
 router.delete('/deleteMe', authController.protect , userController.deleteMe);
 
 
-router.get('/problems-stats/:id', authController.protect, userController.getUserProblemStatistics);
-
-router
-  .route('/:id')
-  .patch(authController.protect ,userController.updateUser)
-  .delete(authController.protect,userController.deleteUser)
-  .get(authController.protect, userController.getAUser);
 
 //router.get('/',authController.protect,userController.getUser);
 
-router.get('/all-users',authController.protect , authController.restrictTo('admin') ,userController.getAllUsers);
+router.get('/all-users',authController.protect , authController.restrictTo('admin'), userController.getAllUsers);
+
+router.get('/problems-stats/:id', authController.protect, userController.getUserProblemStatistics);
 
 router
   .route('/')
   .post(authController.protect , authController.restrictTo('admin'), userController.createUser)
   .get(authController.protect,userController.getUser);
+
+  
+router
+.route('/:id')
+.patch(authController.protect ,userController.updateUser)
+.delete(authController.protect,userController.deleteUser)
+.get(authController.protect, userController.getAUser);
+
+
+
 
 
 module.exports = router;
