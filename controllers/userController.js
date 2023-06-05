@@ -10,6 +10,7 @@ const filterObj = (obj, ...allowedFields)=>{
   });
   return newObj;
 }
+
 exports.getAllUsers = catchAsync(async (req, res) => {
   // EXECUTE A QUERY
   const features = new APIFeatures(User.find({ role: 'user' }), req.query)
@@ -30,8 +31,6 @@ exports.getAllUsers = catchAsync(async (req, res) => {
     data: users,
   });
 });
-
-
 
 exports.getUser = catchAsync(async (req, res) => {
   
@@ -123,10 +122,10 @@ exports.deleteMe = async (req,res) => {
   });
 }
 
-
+// Needs investigation
 exports.getUserProblemStatistics = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).populate('submittedProblems.problem');
+    const user = await User.findById(req.user._id).populate('submittedProblems.problem');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
