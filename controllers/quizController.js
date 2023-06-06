@@ -25,28 +25,6 @@ exports.getQuiz = catchAsync(async (req, res) => {
     },
   });
 });
-exports.updateUserQuizEvaluation = catchAsync(async (req, res) => {
-  const user = await User.findById(req.user);
-
-  if (!user) {
-    return res.status(404).json({
-      status: "error",
-      message: "User not found",
-    });
-  }
-
-  const quizEvaluation = req.body.quizEvaluation;
-  user.quizEvaluation = quizEvaluation;
-
-  //await user.save();
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      user,
-    },
-  });
-});
 
 /* exports.createQuiz = async (req, res) => {
     try{
@@ -123,30 +101,41 @@ exports.createQuiz = catchAsync(async (req, res) => {
   if (!easyQuestions || !mediumQuestions || !hardQuestions) {
     return res.status(400).json({
       status: "fail",
-      message: "error in generating questions",
+      message: "Error in generating questions",
     });
   }
 
   const quiz = new Quiz({
-    questions: [
-      {
-        difficulty: "easy",
-        questionIds: easyQuestionIds,
-      },
-      {
-        difficulty: "medium",
-        questionIds: mediumQuestionIds,
-      },
-      {
-        difficulty: "hard",
-        questionIds: hardQuestionIds,
-      },
-    ],
+    questions: [...easyQuestionIds, ...mediumQuestionIds, ...hardQuestionIds],
   });
+
   await quiz.save();
 
   res.status(201).json({
     status: "success",
     data: quiz,
+  });
+});
+
+exports.updateUserQuizEvaluation = catchAsync(async (req, res) => {
+  const user = await User.findById(req.user);
+
+  if (!user) {
+    return res.status(404).json({
+      status: "error",
+      message: "User not found",
+    });
+  }
+
+  const quizEvaluation = req.body.quizEvaluation;
+  user.quizEvaluation = quizEvaluation;
+
+  //await user.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
   });
 });

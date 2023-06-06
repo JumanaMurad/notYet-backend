@@ -1,25 +1,25 @@
 const mongoose = require("mongoose");
-  
+
 const questionSchema = mongoose.Schema({
-   question: {
+  question: {
     type: String,
-    required: true
+    required: true,
   },
   choices: [
     {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   ],
   answer: {
-    type: String,
-    required: true
+    type: Number,
+    required: true,
   },
   difficulty: {
     type: String,
-    enum: ['easy', 'medium', 'hard'],
-    required: true
-  } 
+    enum: ["easy", "medium", "hard"],
+    required: true,
+  },
 });
 
 const Question = new mongoose.model("Question", questionSchema);

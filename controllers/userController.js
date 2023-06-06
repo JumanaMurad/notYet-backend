@@ -32,7 +32,7 @@ exports.getAllUsers = catchAsync(async (req, res) => {
   });
 });
 
-exports.getUser = catchAsync(async (req, res) => {
+exports.getMe = catchAsync(async (req, res) => {
   
   const user = req.user;
 
@@ -46,7 +46,7 @@ exports.getUser = catchAsync(async (req, res) => {
 }
 );
 
-exports.getAUser = catchAsync( async (req, res) => {
+exports.getUser = catchAsync( async (req, res) => {
   const user = await User.findById(req.params.id);
 
   res.status(200).json({
@@ -67,8 +67,10 @@ exports.createUser = catchAsync(async (req, res) => {
 }
 );
 
-exports.updateUser = catchAsync(
-  async (req, res) => {
+exports.updateUser = catchAsync(async (req, res) => {
+    console.log(req.file);
+    console.log(req.body);
+
     const user = await User.findByIdAndUpdate(
       { _id: req.params.id },
       req.body
@@ -84,11 +86,10 @@ exports.updateUser = catchAsync(
 );
 
 exports.deleteUser = catchAsync(async (req, res) => {
-  const user = await User.findByIdAndRemove(req.params.id);
+  await User.findByIdAndRemove(req.params.id);
 
   res.status(204).json({
-    status: 'success',
-    date: null,
+    message: 'Deleted Successfully'
   });
 
 });
