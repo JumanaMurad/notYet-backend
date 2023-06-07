@@ -1,9 +1,6 @@
 const express = require("express");
-const multer = require('multer');
 const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
-
-const upload = multer({ dest: ''});
 
 const router = express.Router();
 
@@ -17,7 +14,13 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 
 router.patch('/updateMyPassword', authController.protect, authController.updatePassword);
 
-router.patch('/updateMe', upload.single('profilePic'), authController.protect, userController.updateMe);
+router.patch(
+  '/update-me',
+  authController.protect,
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updateMe
+);
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
 router.get('/all-users', authController.protect, userController.getAllUsers);
@@ -27,7 +30,7 @@ router.get('/problems-stats', authController.protect, userController.getUserProb
 router
   .route('/')
   .post(authController.protect, authController.restrictTo('admin'), userController.createUser)
-  .get(authController.protect, authController.restrictTo('admin'), userController.getMe);
+  .get(authController.protect, userController.getMe);
 
 
 router

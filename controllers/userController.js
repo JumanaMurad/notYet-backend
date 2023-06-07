@@ -1,7 +1,44 @@
+const multer = require('multer');
+const sharp = require('sharp');
+const AppError = require("./../utils/appError");
 const User = require('../models/userModel');
 const Problem = require('../models/problemModel');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+
+exports.uploadUserPhoto = upload.single('photo');
+
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
+
+  console.log('req.file:', req.file);
+
+  req.file.filename = `user-${req.user._id}-${Date.now()}.jpeg`;
+
+  await sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`img/${req.file.filename}`);
+
+  next();
+});
+
 
 const filterObj = (obj, ...allowedFields)=>{
   const newObj = {};
@@ -94,26 +131,35 @@ exports.deleteUser = catchAsync(async (req, res) => {
 
 });
 
-exports.updateMe = async (req,res) => {
-  //1)if user entered his password in other field
-  if(req.body.password || req.body.passwordConfirm)
-  {
-    throw error('u can not change password here ');
-  } 
-  //2)Filter unathorized to update fields 
-  const filtered = filterObj(req.body,'name','email','jobTitle');
-  //3)update user document  
-  const updatedUser = await User.findByIdAndUpdate(req.user.id,filtered,
-    {new:true, 
-     runValidators : true
-    }); 
-  res.status(200).json({
-    status:'success',
-    data:{
-      user: updatedUser
+exports.updateMe = catchAsync(async (req, res, next) => {
+  console.log("Updateme: ", req.file)
+  // 1) Create error if user POSTs password data
+  if (req.body.password || req.body.passwordConfirm) {
+    return next(
+      new AppError(
+        'This route is not for password updates. Please use /updateMyPassword.',
+        400
+      )
+    );
   }
+
+  // 2) Filtered out unwanted fields names that are not allowed to be updated
+  const filteredBody = filterObj(req.body, 'email');
+  if (req.file) filteredBody.photo = req.file.filename;
+
+  // 3) Update user document
+  const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
+    new: true,
+    runValidators: true
   });
-}
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser
+    }
+  });
+});
 
 exports.deleteMe = async (req,res) => {
   await User.findByIdAndUpdate(req.user.id , {active : false});
@@ -124,8 +170,8 @@ exports.deleteMe = async (req,res) => {
 }
 
 // Needs investigation
-exports.getUserProblemStatistics = async (req, res) => {
-  try {
+exports.getUserProblemStatistics = catchAsync( async (req, res) => {
+    console.log('req.user:', req.user);
     const user = await User.findById(req.user._id).populate('submittedProblems.problem');
 
     if (!user) {
@@ -169,8 +215,5 @@ exports.getUserProblemStatistics = async (req, res) => {
       solvedPercentage: (totalAccepted / totalSubmitted) * 100 || 0,
       difficultyStats: difficultyStats
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
   }
-}
+);
