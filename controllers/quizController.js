@@ -80,7 +80,20 @@ exports.deleteQuiz = async (req, res) => {
 };
 
 exports.createQuiz = catchAsync(async (req, res) => {
-  const easyQuestions = await Question.aggregate([
+  const {questionIds}  = req.body;
+
+  const newQuiz = await Quiz();
+    newQuiz.questions = questionIds; // Assign questionIds to the 'questions' field
+
+    await newQuiz.save();
+
+
+  res.status(201).json({
+    status: "success",
+    data: newQuiz,
+  }); 
+
+ /* const easyQuestions = await Question.aggregate([
     { $match: { difficulty: "easy" } },
     { $sample: { size: 2 } },
   ]);
@@ -114,7 +127,7 @@ exports.createQuiz = catchAsync(async (req, res) => {
   res.status(201).json({
     status: "success",
     data: quiz,
-  });
+  }); */
 });
 
 exports.updateUserQuizEvaluation = catchAsync(async (req, res) => {
