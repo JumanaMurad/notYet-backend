@@ -66,7 +66,7 @@ const UserSchema = new Schema({
       },
       status: {
          type: String,
-         enum: ['Pending', 'Accepted', 'Wrong Answer', 'Compilation Error', 'Runtime Error', 'Time Limit Exceeded', 'Memory Limit Exceeded'],
+         //enum: ['Pending', 'Accepted', 'Wrong Answer', 'Compilation Error', 'Runtime Error', 'Time Limit Exceeded', 'Memory Limit Exceeded'],
          default: 'Pending'
       }
    }],

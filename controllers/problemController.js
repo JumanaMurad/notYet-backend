@@ -175,23 +175,23 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
     return res.status(404).json({ message: "Team not found in contest" });
   }
 
- // Find the problem based on the ID in the contest
-const contestProblem = contest.problems.find(
-  (problem) => problem._id.toString() === problemId.toString()
-);
-if (!contestProblem) {
-  return res.status(404).json({ message: "Problem not found in contest" });
-}
+  // Find the problem based on the ID in the contest
+  const contestProblem = contest.problems.find(
+    (problem) => problem._id.toString() === problemId.toString()
+  );
+  if (!contestProblem) {
+    return res.status(404).json({ message: "Problem not found in contest" });
+  }
 
 
-// Check if the team has already submitted the problem
-const hasSubmittedProblem = team.solvedProblems.includes(problemId.toString());
+  // Check if the team has already submitted the problem
+  const hasSubmittedProblem = team.solvedProblems.includes(problemId.toString());
 
-if (hasSubmittedProblem) {
-  return res
-    .status(400)
-    .json({ message: "Problem already submitted by the team" });
-}
+  if (hasSubmittedProblem) {
+    return res
+      .status(400)
+      .json({ message: "Problem already submitted by the team" });
+  }
 
 
   // Extract inputs and outputs from the problem
@@ -239,7 +239,7 @@ if (hasSubmittedProblem) {
   }
 
   // Add the submitted problem to the team's submittedProblems array
-  team. solvedProblems.push(problem._id);
+  team.solvedProblems.push(problem._id);
 
   // Update the team's solved problems count and submitted problems array within the contest object
   await contest.save();
@@ -292,6 +292,15 @@ exports.submitProblem = catchAsync(async (req, res) => {
     if (status !== "Accepted") {
       allAccepted = false;
       const testCaseNumber = i + 1;
+      console.log("status: ", status)
+      // Push the problem's status to the user's submittedProblems array
+      user.submittedProblems.push({
+        problem: problem._id, // Store problem id
+        status: status,
+      });
+      await User.updateOne({ _id: userId }, user);
+
+      console.log("user submitted list: ", user.submittedProblems)
       return res.status(400).json({
         message: `${status} on test case number ${testCaseNumber}`,
         status: submissionResults,

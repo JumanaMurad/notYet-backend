@@ -29,7 +29,7 @@ router.get('/problems-stats', authController.protect, userController.getUserProb
 
 router
   .route('/')
-  .post(authController.protect, authController.restrictTo('admin'), userController.createUser)
+  .post(authController.protect, userController.createUser)
   .get(authController.protect, userController.getMe);
 
 
