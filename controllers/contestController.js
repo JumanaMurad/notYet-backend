@@ -120,7 +120,7 @@ exports.deleteContest = catchAsync(async (req, res) => {
 
 
 exports.registerUserForContest = catchAsync(async (req, res) => {
-  const userId = req.user._id;
+  const user = req.user;
   const contestId = req.params.id;
 
   // Find the contest
@@ -134,9 +134,6 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     });
   }
 
-  // Find the user by id
-  const user = await User.findById(userId);
-
   // Check if the user exists
   if (!user) {
     return res.status(404).json({
@@ -145,25 +142,30 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     });
   }
 
- // Check if the user is already registered for the contest
-const isUserRegistered = contest.users.some((entry) => entry.userId && entry.userId.equals(userId));
-if (isUserRegistered) {
-  return res.status(400).json({
-    status: 'fail',
-    message: 'User is already registered for the contest',
-  });
-}
-
+  // Check if the user is already registered for the contest based on the contest ID being present in the user's contest list
+  const isUserRegistered = user.contests.some((entry) => entry.contestId && entry.contestId.equals(contestId));
+  if (isUserRegistered) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'User is already registered for the contest',
+    });
+  }
 
   // Add the user to the contest's users list and individual standing list
   contest.users.push({
-    userId: userId,
+    userId: user._id,
     numberOfSolvedProblems: 0,
   });
-  contest.individualStanding.push(userId);
 
-  // Save the changes to the contest
-  await contest.save();
+  // Add the contest ID to the user's contest list (individual registration)
+  user.contests.push({
+    contestId: contestId,
+    registerationType: 'individual', // Add the registration type
+  });
+
+  // Update the contest and user data
+  await Contest.updateOne({ _id: contestId }, contest);
+  await User.updateOne({ _id: user._id }, user);
 
   res.status(201).json({
     status: 'success',
@@ -174,8 +176,11 @@ if (isUserRegistered) {
 });
 
 
+
+
+// Needs to be tested
 exports.registerTeamForContest = catchAsync(async (req, res) => {
-  const { teamName } = req.body;
+  const teamName = req.body.teamName;
   const contestId = req.params.id;
 
   // Find the contest
@@ -201,15 +206,30 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
   }
 
   // Check if the team is already registered for the contest
-const isTeamRegistered = contest.teams.some((entry) => entry.teamId && entry.teamId.equals(team._id));
-if (isTeamRegistered) {
-  return res.status(400).json({
-    status: 'fail',
-    message: 'Team is already registered for the contest',
+  const isTeamRegistered = contest.teams.some((entry) => entry.teamId && entry.teamId.equals(team._id));
+  if (isTeamRegistered) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Team is already registered for the contest',
+    });
+  }
+
+  // Check if any of the team members are individually registered for the contest
+  const isMemberRegistered = await User.exists({
+    contests: {
+      $elemMatch: {
+        contestId: contestId,
+        registrationType: 'individual',
+        userId: { $in: team.teamMembers.map((member) => member.user) },
+      },
+    },
   });
-}
-
-
+  if (isMemberRegistered) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'One or more team members are already individually registered for the contest',
+    });
+  }
 
   // Add the team to the contest's teams list
   contest.teams.push({
@@ -222,8 +242,24 @@ if (isTeamRegistered) {
   // Add the team ID to the teamStanding list
   contest.teamStanding.push(team._id);
 
-  // Save the changes to the contest
-  await contest.save();
+  // Update the contest
+  await Contest.updateOne({ _id: contest._id }, contest);
+
+  // Update the contest ID and registration type for each team member
+  for (const member of team.teamMembers) {
+    const memberUserId = member.user;
+    await User.findByIdAndUpdate(
+      memberUserId,
+      {
+        $push: {
+          'contests': {
+            contestId: contestId,
+            registerationType: 'team',
+          },
+        },
+      }
+    );
+  }
 
   res.status(201).json({
     status: 'success',
@@ -232,6 +268,7 @@ if (isTeamRegistered) {
     },
   });
 });
+
 
 
 exports.teamStanding = catchAsync(async (req, res) => {

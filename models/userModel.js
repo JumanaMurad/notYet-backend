@@ -74,10 +74,16 @@ const UserSchema = new Schema({
       type : Number,
       default : 0
    },
-   contest : {
-      type: [Schema.Types.ObjectId],
+   contests : [{
+      contestId: {
+      type: Schema.Types.ObjectId,
       ref: 'Contest'
-   },
+      },
+      registerationType: {
+         type: String,
+         enum: ['individual', 'team']
+      }
+   }],
    roadMap : {
       type: String
    },
