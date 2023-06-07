@@ -97,8 +97,6 @@ exports.getProblemNames = catchAsync(async (req, res) => {
 });
 
 
-
-
 exports.userSubmitContestProblem = catchAsync(async (req, res) => {
   const { status, contestId } = req.body;
   const problemId = req.params.id;
@@ -290,7 +288,7 @@ exports.submitProblem = catchAsync(async (req, res) => {
       status: status || "Pending",
     });
 
-    // If the status is not 'Accepted', mark allAccepted as false and stop submitting further test cases
+    // If the status is not 'Accepted', mark all Accepted as false and stop submitting further test cases
     if (status !== "Accepted") {
       allAccepted = false;
       const testCaseNumber = i + 1;
