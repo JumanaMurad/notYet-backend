@@ -82,6 +82,7 @@ exports.createTeam = catchAsync(async (req, res) => {
   });
 });
 
+
 exports.addTeamMember = catchAsync(async (req, res) => {
   const { teamName, username } = req.body;
 
@@ -172,6 +173,7 @@ exports.addTeamMember = catchAsync(async (req, res) => {
 
 exports.joinTeam = catchAsync(async (req, res) => {
   const teamName = req.body;
+  const user = req.user;
   const userId = req.user._id;
 
   // Find the team by teamName
@@ -195,9 +197,6 @@ exports.joinTeam = catchAsync(async (req, res) => {
       message: "Team is full. Cannot add more members",
     });
   }
-
-  // Find the user by username
-  const user = await User.findById(userId);
 
   if (!user) {
     return res.status(404).json({
@@ -324,7 +323,7 @@ exports.editTeamName = catchAsync(async (req, res) => {
   });
 });
 
-exports.acceptRequest = catchAsync(async (req, res) => {
+exports.acceptTeamJoinRequest = catchAsync(async (req, res) => {
   const team = await Team.findById(req.params.id);
   const { username } = req.body;
 
@@ -355,10 +354,25 @@ exports.acceptRequest = catchAsync(async (req, res) => {
     });
   }
 
+  const pendingTeamIndex = user.pendingTeams.findIndex(
+    (teamId) => teamId.toString() === team._id.toString()
+  );
+
+  if (pendingTeamIndex === -1) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Team is not a pending team for the user",
+    });
+  }
+
   team.pendingMembers.splice(pendingMemberIndex, 1);
   team.teamMembers.push({ user: username, role: "member" });
 
+  user.pendingTeams.splice(pendingTeamIndex, 1);
+  user.joinedTeams.push(team._id);
+
   await team.save();
+  await user.save();
 
   res.status(200).json({
     status: "success",
@@ -369,9 +383,10 @@ exports.acceptRequest = catchAsync(async (req, res) => {
   });
 });
 
-exports.rejectRequest = catchAsync(async (req, res) => {
+
+exports.rejectTeamJoinRequest = catchAsync(async (req, res) => {
   const team = await Team.findById(req.params.id);
-  const { username } = req.body;
+  const user = req.user;
 
   if (!team) {
     return res.status(404).json({
@@ -379,9 +394,6 @@ exports.rejectRequest = catchAsync(async (req, res) => {
       message: "Team not found",
     });
   }
-
-  // Find the user by username
-  const user = await User.findOne({ username });
 
   if (!user) {
     return res.status(404).json({
@@ -391,9 +403,9 @@ exports.rejectRequest = catchAsync(async (req, res) => {
   }
 
   // Check if the user is a pending member of the team
-  const pendingMemberIndex = team.pendingMembers.includes(username);
+  const pendingMember = team.pendingMembers.find(member => member.user.equals(user._id) && member.role === 'member');
 
-  if (pendingMemberIndex === -1) {
+  if (!pendingMember) {
     return res.status(400).json({
       status: "fail",
       message: "User is not a pending member of the team",
@@ -401,17 +413,15 @@ exports.rejectRequest = catchAsync(async (req, res) => {
   }
 
   // Remove the user from the pendingMembers list
-  team.pendingMembers.splice(pendingMemberIndex, 1);
+  team.pendingMembers.pull(pendingMember);
 
-  // Remove the team name from the pendingTeams list
-  user.pendingTeams = user.pendingTeams.filter((team) => team !== team);
+  // Remove the team's ID from the pendingTeams list of the user
+  user.pendingTeams = user.pendingTeams.filter(teamId => teamId.toString() !== team._id.toString());
 
-  // Update the team and user models
-  /* await Promise.all([
-    Team.updateOne({ teamName }, team),
-    User.updateOne({ username }, user),
-  ]);*/
-  await team.save();
+  // Update the team and user models using the update function
+  await Team.findByIdAndUpdate({ _id: team._id }, { $set: { pendingMembers: team.pendingMembers } });
+  await User.findByIdAndUpdate({ _id: user._id }, { $set: { pendingTeams: user.pendingTeams } });
+
   res.status(200).json({
     status: "success",
     message: "Request rejected successfully",
@@ -420,6 +430,8 @@ exports.rejectRequest = catchAsync(async (req, res) => {
     },
   });
 });
+
+
 exports.getPendingRequests = catchAsync(async (req, res) => {
   const { teamName } = req.body;
   const team = await Team.findOne({ teamName });

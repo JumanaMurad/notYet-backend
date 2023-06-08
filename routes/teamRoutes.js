@@ -14,9 +14,9 @@ router.patch("/join-team", authController.protect, teamController.joinTeam);
 router.patch("/edit-team-name/:id", authController.protect,
   authController.restrictTo("admin"), teamController.editTeamName);
 
-router.patch("/accept-request/:id", authController.protect, teamController.acceptRequest);
+router.patch("/accept-request/:id", authController.protect, teamController.acceptTeamJoinRequest);
 
-router.patch("/reject-request/:id", authController.protect, teamController.rejectRequest);
+router.patch("/reject-request/:id", authController.protect, teamController.rejectTeamJoinRequest);
 
 router.get("/getPendingRequests", authController.protect, teamController.getPendingRequests);
 

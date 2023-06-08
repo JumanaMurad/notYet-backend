@@ -176,8 +176,6 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
 });
 
 
-
-
 // Needs to be tested
 exports.registerTeamForContest = catchAsync(async (req, res) => {
   const teamName = req.body.teamName;
@@ -268,7 +266,6 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
     },
   });
 });
-
 
 
 exports.teamStanding = catchAsync(async (req, res) => {
