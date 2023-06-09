@@ -1,15 +1,12 @@
 const express = require("express");
-const app = express();
-const httpServer = require("http").createServer(app);
-const io = require("socket.io")(httpServer);
-const { v4: uuidv4 } = require("uuid");
 const Whiteboard = require("../models/whiteboardModel");
+const catchAsync = require("../utils/catchAsync");
 
 const MAX_USERS_PER_SESSION = 3;
 let connectedUsers = {};
 
 //function handles the socket.io connection events, including session validation, joining/leaving sessions, loading/saving drawing data, and emitting/receiving "canvas-data" events.
-function handleConnection(socket) {
+const handleConnection = (socket) => {
   const { sessionId } = socket.handshake.query;
 
   if (!sessionId || !isValidSession(sessionId)) {
@@ -53,9 +50,9 @@ function handleConnection(socket) {
       }
     });
   });
-}
+};
 
-function isValidSession(sessionId) {
+exports.isValidSession = catchAsync((sessionId) => {
   console.log("Validating session ID:", sessionId);
 
   const isValid = typeof sessionId === "string" && sessionId.trim().length > 0;
@@ -63,9 +60,9 @@ function isValidSession(sessionId) {
   console.log("Session ID validation result:", isValid);
 
   return isValid;
-}
+});
 
-function loadDrawingData(sessionId, callback) {
+exports.loadDrawingData = catchAsync((sessionId, callback) => {
   Whiteboard.findOne({ sessionId }, (err, drawing) => {
     if (err) {
       callback(err);
@@ -75,9 +72,9 @@ function loadDrawingData(sessionId, callback) {
       callback(null, null);
     }
   });
-}
+});
 
-function saveDrawingData(sessionId, data, callback) {
+exports.saveDrawingData = catchAsync((sessionId, data, callback) => {
   Whiteboard.findOneAndUpdate(
     { sessionId },
     { sessionId, data },
@@ -90,18 +87,10 @@ function saveDrawingData(sessionId, data, callback) {
       }
     }
   );
-}
-io.on("connection", handleConnection);
+});
 
-// Start the server
-// const port = 4000;
-// httpServer.listen(port, () => {
-//   console.log(`Server running on port ${port}`);
-// });
-
-module.exports = {
-  handleConnection,
-  isValidSession,
-  loadDrawingData,
-  saveDrawingData,
+exports.setIO = (socketIO) => {
+  io = socketIO; // Set the io variable
 };
+
+exports.handleConnection = handleConnection;
