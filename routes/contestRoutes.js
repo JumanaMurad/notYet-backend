@@ -18,7 +18,7 @@ router
     
     router.patch('/register-team-contest/:id', authController.protect, contestController.registerTeamForContest);
 
-    router.patch('/register-contest/:id', authController.protect, contestController.registerUserForContest);
+router.patch('/register-contest/:id', authController.protect, contestController.registerUserForContest);
 
 router.patch('/team-standing/:id', authController.protect ,contestController.teamStanding);
 

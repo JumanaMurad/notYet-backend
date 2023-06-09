@@ -7,7 +7,6 @@ router
   .route("/")
   .get(
     authController.protect,
-    authController.restrictTo("admin"),
     questionController.getAllQuestions
   )
   .post(
@@ -30,7 +29,6 @@ router
   )
   .get(
     authController.protect,
-    authController.restrictTo("admin"),
     questionController.getQuestion
   );
 module.exports = router;

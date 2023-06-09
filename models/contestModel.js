@@ -25,6 +25,20 @@ const contestSchema = new Schema({
             type : Number,
             default: 0
            },
+        solvedProblems : [{
+            type: Schema.Types.ObjectId,
+            ref: 'Problem'
+           }]
+    }],
+    contestants: [{
+        userId : {
+            type: Schema.Types.ObjectId,
+            ref: 'User' 
+    },
+        teamId : {
+            type : Schema.Types.ObjectId,
+            ref: 'Team'
+           },
     }],
     teams: [{
         teamId : {

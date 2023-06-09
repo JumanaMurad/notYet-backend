@@ -157,6 +157,12 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     numberOfSolvedProblems: 0,
   });
 
+  // Add the user to the contest's contestants list
+  contest.contestants.push({
+    userId: user._id,
+    teamId: null, // Since this is an individual registration, the teamId can be set to null
+  });
+
   // Add the contest ID to the user's contest list (individual registration)
   user.contests.push({
     contestId: contestId,
@@ -174,6 +180,9 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     },
   });
 });
+
+
+
 
 
 // Needs to be tested
@@ -212,52 +221,60 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
     });
   }
 
-  // Check if any of the team members are individually registered for the contest
-  const isMemberRegistered = await User.exists({
-    contests: {
-      $elemMatch: {
-        contestId: contestId,
-        registrationType: 'individual',
-        userId: { $in: team.teamMembers.map((member) => member.user) },
-      },
+  // Check if any of the team members are already registered as contestants for the contest
+const isMemberRegistered = await Contest.exists({
+  _id: contestId,
+  contestants: {
+    $elemMatch: {
+      userId: { $in: team.teamMembers.map((member) => member.user) },
     },
+  },
+});
+
+if (isMemberRegistered) {
+  return res.status(400).json({
+    status: 'fail',
+    message: 'One or more team members are already registered as contestants for the contest',
   });
-  if (isMemberRegistered) {
-    return res.status(400).json({
-      status: 'fail',
-      message: 'One or more team members are already individually registered for the contest',
-    });
-  }
+}
+
 
   // Add the team to the contest's teams list
-  contest.teams.push({
+  const newTeamEntry = {
     teamId: team._id,
     sessionId: team.sessionId,
     numberOfSolvedProblems: 0,
     submittedProblems: [],
-  });
+  };
 
-  // Add the team ID to the teamStanding list
-  contest.teamStanding.push(team._id);
+  await contest.updateOne({ $push: { teams: newTeamEntry } });
 
-  // Update the contest
-  await Contest.updateOne({ _id: contest._id }, contest);
+  // Add all team members to the contestants list with the teamId
+  const newContestantEntries = team.teamMembers.map((member) => ({
+    userId: member.user,
+    teamId: team._id,
+  }));
 
-  // Update the contest ID and registration type for each team member
+  await contest.updateOne({ $push: { contestants: { $each: newContestantEntries } } });
+
+  // Add the contest ID to the contests list for each team member
   for (const member of team.teamMembers) {
     const memberUserId = member.user;
     await User.findByIdAndUpdate(
       memberUserId,
       {
         $push: {
-          'contests': {
+          contests: {
             contestId: contestId,
-            registerationType: 'team',
+            registrationType: 'team',
           },
         },
       }
     );
   }
+
+  // Add the team ID to the teamStanding list
+  await contest.updateOne({ $push: { teamStanding: team._id } });
 
   res.status(201).json({
     status: 'success',
@@ -266,6 +283,8 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
     },
   });
 });
+
+
 
 
 exports.teamStanding = catchAsync(async (req, res) => {

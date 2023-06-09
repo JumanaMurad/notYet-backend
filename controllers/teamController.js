@@ -179,9 +179,9 @@ exports.joinTeam = catchAsync(async (req, res) => {
   // Find the team by teamName
   const team = await Team.findOne({ teamName });
 
-  const teamLeader = team.teamMembers.find(
-    (member) => member.role === "team-leader"
-  );
+  // const teamLeader = team.teamMembers.find(
+  //   (member) => member.role === "team-leader"
+  // );
 
   if (!team) {
     return res.status(404).json({
