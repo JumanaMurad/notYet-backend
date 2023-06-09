@@ -1,6 +1,6 @@
 //const apiKey = '3abb6dde21msh7cc8b3391194d87p1b2715jsn00d03f4b14b3';
 
-const apiKey = "5566116e44msh7a35ea46a3da536p1f2403jsn3dc49a767105";
+const apiKey = "3abb6dde21msh7cc8b3391194d87p1b2715jsn00d03f4b14b3";
 
 exports.submitCodeToJudge0 = async (code, language, stdin, expectedOutput) => {
   const endpoint = "https://judge0-ce.p.rapidapi.com/submissions";

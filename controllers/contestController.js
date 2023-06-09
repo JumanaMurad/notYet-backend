@@ -151,11 +151,14 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     });
   }
 
-  // Add the user to the contest's users list and individual standing list
-  contest.users.push({
-    userId: user._id,
-    numberOfSolvedProblems: 0,
-  });
+// Add the user to the contest's users list and individual standing list
+contest.users.push({
+  userId: user._id,
+  numberOfSolvedProblems: 0,
+});
+
+// Add the user to the contest's individual standing list
+contest.individualStanding.push(user._id);
 
   // Add the user to the contest's contestants list
   contest.contestants.push({
@@ -180,9 +183,6 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     },
   });
 });
-
-
-
 
 
 // Needs to be tested
@@ -266,7 +266,7 @@ if (isMemberRegistered) {
         $push: {
           contests: {
             contestId: contestId,
-            registrationType: 'team',
+            registerationType: 'team',
           },
         },
       }

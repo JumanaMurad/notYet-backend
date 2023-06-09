@@ -205,7 +205,7 @@ status: submissionResults,
 });
 
 exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
-  const { contestId, teamName, code, language } = req.body;
+  const { contestId, teamId, code, language } = req.body;
   const problemId = req.params.id; // Retrieve problem ID from req.params
 
   // Retrieve problem inputs and outputs
@@ -215,7 +215,7 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
     return res.status(404).json({ message: "Problem not found" });
   }
 
-  const submittingTeam = await Team.findOne({ teamName: teamName });
+  const submittingTeam = await Team.findById(teamId);
 
   if (!submittingTeam) {
     return res.status(404).json({ message: "Team not found" });
@@ -228,7 +228,7 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
   );
 
   if (!isMember) {
-    return res.status(401).json({ message: `User is not a member in ${teamName} team` });
+    return res.status(401).json({ message: `User is not a member in ${submittingTeam.teamName} team` });
   }
 
   // Find the contest object

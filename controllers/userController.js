@@ -166,51 +166,53 @@ exports.deleteMe = async (req,res) => {
   });
 }
 
-// Needs investigation
-exports.getUserProblemStatistics = catchAsync( async (req, res) => {
-    console.log('req.user:', req.user);
-    const user = await User.findById(req.user._id).populate('submittedProblems.problem');
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+exports.getUserProblemStatistics = catchAsync(async (req, res) => {
+  console.log('req.user:', req.user);
+  const user = await User.findById(req.user._id).populate('submittedProblems.problem');
 
-    const submittedProblems = user.submittedProblems;
-    const totalSubmitted = submittedProblems.length;
-
-    let totalAccepted = 0;
-    let difficultyStats = {
-      Hard: { totalSubmitted: 0, totalAccepted: 0, solvedPercentage: 0 },
-      Easy: { totalSubmitted: 0, totalAccepted: 0, solvedPercentage: 0 },
-      Medium: { totalSubmitted: 0, totalAccepted: 0, solvedPercentage: 0 }
-    };
-
-    for (let i = 0; i < totalSubmitted; i++) {
-      const problem = submittedProblems[i].problem;
-
-      // Check if problem is null or undefined
-      if (!problem) {
-        continue;
-      }
-
-      if (submittedProblems[i].status === 'Accepted') {
-        totalAccepted++;
-        difficultyStats[problem.difficulty].totalAccepted++;
-      }
-      difficultyStats[problem.difficulty].totalSubmitted++;
-    }
-
-    for (const difficulty in difficultyStats) {
-      const { totalSubmitted, totalAccepted } = difficultyStats[difficulty];
-      const solvedPercentage = (totalAccepted / totalSubmitted) * 100 || 0;
-      difficultyStats[difficulty].solvedPercentage = solvedPercentage;
-    }
-
-    res.status(200).json({
-      totalSubmitted: totalSubmitted,
-      totalAccepted: totalAccepted,
-      solvedPercentage: (totalAccepted / totalSubmitted) * 100 || 0,
-      difficultyStats: difficultyStats
-    });
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
   }
-);
+
+  const submittedProblems = user.submittedProblems;
+  const totalSubmitted = submittedProblems.length;
+
+  let totalAccepted = 0;
+  let difficultyStats = {
+    Hard: { totalSubmitted: 0, totalAccepted: 0, solvedPercentage: 0 },
+    Easy: { totalSubmitted: 0, totalAccepted: 0, solvedPercentage: 0 },
+    Medium: { totalSubmitted: 0, totalAccepted: 0, solvedPercentage: 0 }
+  };
+
+  for (let i = 0; i < totalSubmitted; i++) {
+    const problem = submittedProblems[i].problem;
+
+    // Check if problem is null or undefined
+    if (!problem) {
+      continue;
+    }
+
+    if (submittedProblems[i].status === 'Accepted') {
+      totalAccepted++;
+      difficultyStats[problem.difficulty].totalAccepted++;
+    }
+    difficultyStats[problem.difficulty].totalSubmitted++;
+  }
+
+  for (const difficulty in difficultyStats) {
+    const { totalSubmitted, totalAccepted } = difficultyStats[difficulty];
+    const solvedPercentage = ((totalAccepted / totalSubmitted) * 100 || 0).toFixed(2);
+    difficultyStats[difficulty].solvedPercentage = solvedPercentage;
+  }
+
+  const solvedPercentage = ((totalAccepted / totalSubmitted) * 100 || 0).toFixed(2);
+
+  res.status(200).json({
+    totalSubmitted: totalSubmitted,
+    totalAccepted: totalAccepted,
+    solvedPercentage: solvedPercentage,
+    difficultyStats: difficultyStats
+  });
+});
+
