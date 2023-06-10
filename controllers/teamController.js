@@ -276,18 +276,6 @@ exports.deleteTeam = catchAsync(async (req, res) => {
     });
   }
 
-  // Remove team name from joinedTeams array for all team members
-  const updateUsers = await User.updateMany(
-    { joinedTeams: team.teamName },
-    { $pull: { joinedTeams: team.teamName } }
-  );
-
-  // Remove team name from pendingTeams array for all pending members
-  const updatePendingUsers = await User.updateMany(
-    { pendingTeams: team.teamName },
-    { $pull: { pendingTeams: team.teamName } }
-  );
-
   // Delete the team
   await team.remove();
 

@@ -5,7 +5,6 @@ const cors = require("cors");
 
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
-const { handleConnection } = require("./controllers/sessionController");
 
 const problemRouter = require("./routes/problemRoutes");
 const teamRouter = require("./routes/teamRoutes");
@@ -17,6 +16,7 @@ const contestRouter = require("./routes/contestRoutes");
 const roadmapRouter = require("./routes/roadmapRoutes");
 const questionRouter = require("./routes/questionRoutes");
 const sessionRouter = require("./routes/sessionRoutes");
+const whiteboardRoutes = require('./routes/whiteboardRoutes');
 
 const app = express();
 
@@ -46,6 +46,8 @@ app.use("/contests", contestRouter);
 app.use("/roadmaps", roadmapRouter);
 app.use("/questions", questionRouter);
 app.use("/session", sessionRouter);
+// Register the whiteboardRoutes middleware
+app.use('/', whiteboardRoutes);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl}`, 404));
