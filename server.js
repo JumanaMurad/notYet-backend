@@ -3,8 +3,8 @@ const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
 const app = require("./app");
 const { v4: uuidv4 } = require("uuid");
-const Whiteboard = require("./models/whiteboardModel");
-const { handleConnection } = require("./controllers/sessionController");
+//const Whiteboard = require("./models/whiteboardModel");
+//const { handleConnection } = require("./controllers/sessionController");
 const http = require("http");
 const socketIO = require("socket.io");
 
@@ -26,14 +26,16 @@ mongoose
   });
 
 // Create the HTTP server
-const server = http.createServer(app);
+//const server = http.createServer(app);
 
-// Initialize Socket.IO
-const io = socketIO(server);
-io.on("connection", handleConnection);
+// // Initialize Socket.IO
+// const io = socketIO(server);
+// io.on("connection", handleConnection);
 
 // Start the server
 const port = process.env.PORT || 5000;
-server.listen(port, () => {
-  console.log(`App running on port ${port}...`);
+app.listen(port, () => {
+  console.log(
+    `App running on port ${port}...`
+  );
 });
