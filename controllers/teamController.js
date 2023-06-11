@@ -183,16 +183,12 @@ exports.addTeamMember = catchAsync(async (req, res) => {
 });
 
 exports.joinTeam = catchAsync(async (req, res) => {
-  const teamName = req.body;
+  const teamName = req.body.teamName;
   const user = req.user;
   const userId = req.user._id;
 
   // Find the team by teamName
-  const team = await Team.findOne({ teamName });
-
-  // const teamLeader = team.teamMembers.find(
-  //   (member) => member.role === "team-leader"
-  // );
+  const team = await Team.findOne({ teamName: teamName });
 
   if (!team) {
     return res.status(404).json({
@@ -231,20 +227,12 @@ exports.joinTeam = catchAsync(async (req, res) => {
     });
   }
 
-  //edit fel urls dol a hussein
+  // Edit the URLs here
   const acceptUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
   const rejectUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
 
-  // await sendEmail({
-  //   email: teamLeader.email,
-  //   subject: "A new user watns to join your team.",
-  //   message: `<p>Hello ${teamLeader.username},</p>
-  //   <p>A new user, ${user.username}, has requested to join your team, ${team.teamName}.</p>
-  //   <p>Do you want to accept or reject this request?</p>
-  //   <a href="${acceptUrl}"><button style="background-color: green; color: white; padding: 10px;">Yes</button></a>
-  //   <a href="${rejectUrl}"><button style="background-color: red; color: white; padding: 10px;">No</button></a>
-  //   `,
-  // });
+  // Send an email to the team leader
+  // ...
 
   // Create a new team member object
   const newTeamMember = {
@@ -252,12 +240,12 @@ exports.joinTeam = catchAsync(async (req, res) => {
     role: "member",
   };
 
-  // Always add the team member pendingMembers
+  // Add the team member to the pendingMembers array
   team.pendingMembers.push(newTeamMember);
 
-  // Add team name to the pendingTeams array for the user
-  await User.findByIdAndDelete(
-    { userId },
+  // Add the team ID to the user's pendingTeams array
+  await User.findByIdAndUpdate(
+    userId,
     {
       $push: { pendingTeams: team._id },
     }
@@ -273,6 +261,7 @@ exports.joinTeam = catchAsync(async (req, res) => {
     },
   });
 });
+
 
 exports.deleteTeam = catchAsync(async (req, res) => {
   const teamId = req.params.id;

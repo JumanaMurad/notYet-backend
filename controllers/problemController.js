@@ -172,7 +172,7 @@ let allAccepted = true; // Track if all test cases are accepted
   if (status !== "Accepted") {
     allAccepted = false;
     const testCaseNumber = i + 1;
-    console.log("user submitted list: ", user.submittedProblems)
+    
     return res.status(400).json({
       message: `${status} on test case number ${testCaseNumber}`,
       status: submissionResults
@@ -363,7 +363,6 @@ exports.submitProblem = catchAsync(async (req, res) => {
     if (status !== "Accepted") {
       allAccepted = false;
       const testCaseNumber = i + 1;
-      console.log("status: ", status)
       // Push the problem's status to the user's submittedProblems array
       user.submittedProblems.push({
         problem: problem._id, // Store problem id
@@ -371,7 +370,6 @@ exports.submitProblem = catchAsync(async (req, res) => {
       });
       await User.updateOne({ _id: userId }, user);
 
-      console.log("user submitted list: ", user.submittedProblems)
       return res.status(400).json({
         message: `${status} on test case number ${testCaseNumber}`,
         status: submissionResults,
