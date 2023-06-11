@@ -145,8 +145,11 @@ if (hasSubmittedProblem) {
     .json({ message: "Problem already submitted before" });
 }
 
-// Extract inputs and outputs from the problem
-const { inputs, outputs } = problem;
+// Combine the inputs and hiddenInputs arrays into a single inputs array
+const inputs = [...problem.inputs, ...problem.hiddenInputs];
+
+// Combine the outputs and hiddenOutputs arrays into a single outputs array
+const outputs = [...problem.outputs, ...problem.hiddenOutputs];
 
 // Create an array to store the submission results
 const submissionResults = [];
@@ -265,8 +268,11 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
   }
 
 
-  // Extract inputs and outputs from the problem
-  const { inputs, outputs } = problem;
+  // Combine the inputs and hiddenInputs arrays into a single inputs array
+const inputs = [...problem.inputs, ...problem.hiddenInputs];
+
+// Combine the outputs and hiddenOutputs arrays into a single outputs array
+const outputs = [...problem.outputs, ...problem.hiddenOutputs];
 
   // Create an array to store the submission results
   const submissionResults = [];
@@ -336,8 +342,11 @@ exports.submitProblem = catchAsync(async (req, res) => {
     return res.status(404).json({ message: "User not found" });
   }
 
-  // Extract inputs and outputs from the problem
-  const { inputs, outputs } = problem;
+  // Combine the inputs and hiddenInputs arrays into a single inputs array
+const inputs = [...problem.inputs, ...problem.hiddenInputs];
+
+// Combine the outputs and hiddenOutputs arrays into a single outputs array
+const outputs = [...problem.outputs, ...problem.hiddenOutputs];
 
   // Create an array to store the submission results
   const submissionResults = [];
