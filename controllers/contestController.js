@@ -1,16 +1,21 @@
 const Contest = require('../models/contestModel');
 const Team = require('../models/teamModel');
-const User = require('../models/userModel')
-const Problem = require('../models/problemModel')
+const User = require('../models/userModel');
+const Problem = require('../models/problemModel');
+const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 
-exports.getAllContests = catchAsync(async (req, res) => {
-  //Filtering
-  const queryObj = { ...req.query };
-  let queryStr = JSON.stringify(queryObj);
-  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
-  const contests = await Contest.find(JSON.parse(queryStr));
+exports.getAllContests = catchAsync(async (req, res) => {
+
+  // EXECUTE A QUERY
+  const features = new APIFeatures(Contest.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const contests = await features.query;
 
   res.status(200).json({
     status: 'success',

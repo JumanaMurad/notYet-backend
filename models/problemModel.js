@@ -36,6 +36,12 @@ const problemSchema = new Schema({
      outputs: [{
       type: String
      }],
+     hiddenInputs: [{
+      type: String
+     }],
+     hddenOutputs: [{
+      type: String
+     }],
      numberOfSolutions: {
       type: Number,
       default: 0

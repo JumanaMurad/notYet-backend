@@ -1,10 +1,21 @@
 const Team = require("../models/teamModel");
 const User = require("../models/userModel");
+const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require("./../utils/catchAsync");
 const sendEmail = require("../utils/email");
 
+
+
 exports.getAllTeams = catchAsync(async (req, res) => {
-  const teams = await Team.find();
+  // EXECUTE A QUERY
+  const features = new APIFeatures(Team.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const teams = await features.query;
+  
   res.status(200).json({
     status: "success",
     results: teams.length,

@@ -1,9 +1,18 @@
 const Question = require("../models/questionModel");
+const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
 
 // Get all questions
 exports.getAllQuestions = catchAsync(async (req, res) => {
-  const questions = await Question.find();
+
+  // EXECUTE A QUERY
+  const features = new APIFeatures(Question.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const questions = await features.query;
 
   res.status(200).json({
     status: "success",

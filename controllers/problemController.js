@@ -16,6 +16,7 @@ exports.getAllProblems = catchAsync(async (req, res) => {
     .paginate();
 
   const problems = await features.query;
+  
   if (!problems) {
     return next(new AppError("not found", 404));
   }
