@@ -43,10 +43,10 @@ exports.getProblem = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createProblem = catchAsync(async (req, res, next) => {
-  const { inputs, outputs } = req.body;
+exports.createProblem = catchAsync(async (req, res) => {
+  const { inputs, outputs, hiddenInputs, hiddenOutputs } = req.body;
 
-  if (inputs.length !== outputs.length) {
+  if (inputs.length !== outputs.length || hiddenInputs.length !== hiddenOutputs.length) {
     return res
       .status(400)
       .json({ message: "Inputs and outputs must have the same length" });
