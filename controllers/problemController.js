@@ -177,7 +177,7 @@ let allAccepted = true; // Track if all test cases are accepted
     const testCaseNumber = i + 1;
     
     return res.status(400).json({
-      message: `${status} on test case number ${testCaseNumber}`,
+      message: `${status} on test ${testCaseNumber}`,
       status: submissionResults
     });
   }
@@ -380,7 +380,7 @@ const outputs = [...problem.outputs, ...problem.hiddenOutputs];
       await User.updateOne({ _id: userId }, user);
 
       return res.status(400).json({
-        message: `${status} on test case number ${testCaseNumber}`,
+        message: `${status} on test ${testCaseNumber}`,
         status: submissionResults,
       });
     }
