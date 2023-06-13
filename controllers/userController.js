@@ -4,6 +4,11 @@ const AppError = require("./../utils/appError");
 const User = require('../models/userModel');
 const Problem = require('../models/problemModel');
 const catchAsync = require('../utils/catchAsync');
+const uploadFile = require('../s3');
+const fs = require('fs');
+const util = require('util');
+const unlinkFile = util.promisify(fs.unlink);
+
 const APIFeatures = require('../utils/apiFeatures');
 
 const multerStorage = multer.memoryStorage();
@@ -44,6 +49,58 @@ const filterObj = (obj, ...allowedFields)=>{
   });
   return newObj;
 }
+
+exports.updateMe = catchAsync(async (req, res, next) => {
+  // 1) Create an error if the user POSTs password data
+  if (req.body.password || req.body.passwordConfirm) {
+    return next(
+      new AppError(
+        'This route is not for password updates. Please use /updateMyPassword.',
+        400
+      )
+    );
+  }
+
+  // 2) Filter out unwanted field names that are not allowed to be updated
+  const filteredBody = filterObj(req.body, 'email');
+
+  // 3) Check if the user has uploaded a new photo
+  if (req.file) {
+    // Remove the current photo if it is not "boy.png"
+    const currentUser = await User.findById(req.user._id);
+    if (currentUser.photo !== 'boy.png') {
+      const currentPhotoKey = currentUser.photo; // Assuming the photo field stores the S3 key
+      await uploadFile.removeFile(currentPhotoKey); // Custom function to remove the file from S3
+    }
+
+    // Upload the new photo to AWS S3
+    const file = req.file;
+    const result = await uploadFile.upload(file);
+    filteredBody.photo = result.Key;
+  }
+
+  // 4) Update the user document
+  const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser
+    }
+  });
+});
+
+
+exports.getProfilePicture = catchAsync( async (req, res) => {
+  //const key = req.user.photo;
+  const key = req.params.key;
+  const readStream = uploadFile.getFileStream(key);
+
+  readStream.pipe(res);
+});
 
 exports.getAllUsers = catchAsync(async (req, res) => {
   // EXECUTE A QUERY
@@ -128,35 +185,7 @@ exports.deleteUser = catchAsync(async (req, res) => {
 
 });
 
-exports.updateMe = catchAsync(async (req, res, next) => {
-  console.log("Updateme: ", req.file)
-  // 1) Create error if user POSTs password data
-  if (req.body.password || req.body.passwordConfirm) {
-    return next(
-      new AppError(
-        'This route is not for password updates. Please use /updateMyPassword.',
-        400
-      )
-    );
-  }
 
-  // 2) Filtered out unwanted fields names that are not allowed to be updated
-  const filteredBody = filterObj(req.body, 'email');
-  if (req.file) filteredBody.photo = req.file.filename;
-
-  // 3) Update user document
-  const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
-    new: true,
-    runValidators: true
-  });
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      user: updatedUser
-    }
-  });
-});
 
 exports.deleteMe = async (req,res) => {
   await User.findByIdAndUpdate(req.user.id , {active : false});

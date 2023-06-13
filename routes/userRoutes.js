@@ -1,6 +1,7 @@
 const express = require("express");
 const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
+const uploadFile = require('../s3');
 
 const router = express.Router();
 
@@ -21,6 +22,10 @@ router.patch(
   userController.resizeUserPhoto,
   userController.updateMe
 );
+
+router.get('/image/:key', userController.getProfilePicture);
+
+
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
 router.get('/all-users', authController.protect, userController.getAllUsers);
