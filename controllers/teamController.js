@@ -144,27 +144,29 @@ exports.addTeamMember = catchAsync(async (req, res) => {
   await User.findOneAndUpdate(
     { username },
     {
-      $push: { pendingTeams: team.teamName },
+      $push: { pendingTeams: team._id },
     }
   );
 
-  const acceptUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
-  const rejectUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
+  const acceptUrl = `http://localhost:3000/accept-team-request/${team._id}/${user.username}`;
+  const rejectUrl = `http://localhost:3000/reject-team-request/${team._id}/${user.username}`;
+
 
   await sendEmail({
     email: user.email,
     subject: `NOT YET ! TEAM INVITATION.`,
-    message: `<p>Hello ${user.username},</p>
-    <p You're invtied to join : ${team.teamName}.</p>
-    <p>Do you want to accept or reject this request?</p>
-    <a href="${acceptUrl}"><button style="background-color: green; color: white; padding: 10px;">Yes</button></a>
-    <a href="${rejectUrl}"><button style="background-color: red; color: white; padding: 10px;">No</button></a>
+    message: `Hello ${user.username},
+     You're invtied to join : ${team.teamName}.
+    Do you want to accept or reject this request?
+    Click ${acceptUrl} if YES
+    OR
+    Click ${rejectUrl} if NO 
     `,
   });
 
   // Create a new team member object
   const newTeamMember = {
-    user: user.username,
+    user: user._id,
     role: "member",
   };
 
@@ -312,8 +314,9 @@ exports.editTeamName = catchAsync(async (req, res) => {
 });
 
 exports.acceptTeamJoinRequest = catchAsync(async (req, res) => {
-  const team = await Team.findById(req.params.id);
-  const user = req.user;
+  const { teamId, userName } = req.params;
+
+  const team = await Team.findById(teamId);
 
   if (!team) {
     return res.status(404).json({
@@ -321,6 +324,8 @@ exports.acceptTeamJoinRequest = catchAsync(async (req, res) => {
       message: "Team not found",
     });
   }
+
+  const user = await User.findOne({ username: userName });
 
   if (!user) {
     return res.status(404).json({
@@ -380,8 +385,9 @@ exports.acceptTeamJoinRequest = catchAsync(async (req, res) => {
 });
 
 exports.rejectTeamJoinRequest = catchAsync(async (req, res) => {
-  const team = await Team.findById(req.params.id);
-  const user = req.user;
+  const { teamId, userName } = req.params;
+
+  const team = await Team.findById(teamId);
 
   if (!team) {
     return res.status(404).json({
@@ -389,7 +395,7 @@ exports.rejectTeamJoinRequest = catchAsync(async (req, res) => {
       message: "Team not found",
     });
   }
-
+  const user = await User.findOne({ username: userName });
   if (!user) {
     return res.status(404).json({
       status: "fail",

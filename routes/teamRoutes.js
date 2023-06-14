@@ -13,9 +13,13 @@ router
 router.patch("/join-team", authController.protect, teamController.joinTeam);
 router.patch("/edit-team-name/:id", authController.protect, teamController.editTeamName);
 
-router.patch("/accept-request/:id", authController.protect, teamController.acceptTeamJoinRequest);
+//router.patch("/accept-request/:id", authController.protect, teamController.acceptTeamJoinRequest);
 
-router.patch("/reject-request/:id", authController.protect, teamController.rejectTeamJoinRequest);
+//router.patch("/reject-request/:id", authController.protect, teamController.rejectTeamJoinRequest);
+
+router.patch('/accept-team-request/:teamId/:userName', teamController.acceptTeamJoinRequest);
+router.patch('/reject-team-request/:teamId/:userName', teamController.rejectTeamJoinRequest);
+
 
 router.get("/getPendingRequests", authController.protect, teamController.getPendingRequests);
 
