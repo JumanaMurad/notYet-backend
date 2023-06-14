@@ -99,7 +99,7 @@ exports.getProfilePicture = catchAsync( async (req, res) => {
   const key = req.params.key;
   const readStream = uploadFile.getFileStream(key);
 
-  readStream.pipe(res);
+  console.log(readStream.pipe(res));
 });
 
 exports.getAllUsers = catchAsync(async (req, res) => {
@@ -159,9 +159,6 @@ exports.createUser = catchAsync(async (req, res) => {
 );
 
 exports.updateUser = catchAsync(async (req, res) => {
-    console.log(req.file);
-    console.log(req.body);
-
     const user = await User.findByIdAndUpdate(
       { _id: req.params.id },
       req.body
@@ -197,7 +194,6 @@ exports.deleteMe = async (req,res) => {
 
 
 exports.getUserProblemStatistics = catchAsync(async (req, res) => {
-  console.log('req.user:', req.user);
   const user = await User.findById(req.user._id).populate('submittedProblems.problem');
 
   if (!user) {

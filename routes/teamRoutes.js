@@ -11,8 +11,7 @@ router
   .post(authController.protect, teamController.createTeam);
 
 router.patch("/join-team", authController.protect, teamController.joinTeam);
-router.patch("/edit-team-name/:id", authController.protect,
-  authController.restrictTo("admin"), teamController.editTeamName);
+router.patch("/edit-team-name/:id", authController.protect, teamController.editTeamName);
 
 router.patch("/accept-request/:id", authController.protect, teamController.acceptTeamJoinRequest);
 
