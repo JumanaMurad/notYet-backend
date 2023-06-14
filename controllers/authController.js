@@ -38,7 +38,7 @@ exports.signup = catchAsync(async (req, res) => {
   await sendEmail({
     email: newUser.email,
     subject: "verify your email",
-    message: `Please click <a href="${verificationUrl}">here</a> to verify your email address.`,
+    message: `Please click ${verificationUrl} to verify your email address.`,
   });
   createSendToken(newUser, 201, res);
 });
@@ -135,11 +135,11 @@ exports.forgotPassword = async (req, res) => {
   await user.save({ validateBeforeSave: false });
   //3)Send it to user's email
   // const resetURL = `http://localhost:3000/login/ResetPassword/${resetToken}`;
-  const message = `You requested a password reset. Click <a href="http://localhost:3000/login/resetPassword?token=${resetToken}">here</a> to reset your password`;
+  const message = `You requested a password reset. Click "http://localhost:3000/login/resetPassword?token=${resetToken}"here to reset your password`;
   try {
     await sendEmail({
       email: req.body.email,
-      subject: `your password reset token {valid for 10 min}`,
+      subject: `Reset Your Password`,
       message,
     });
     res.status(200).json({
@@ -182,7 +182,7 @@ exports.resetPassword = catchAsync(async (req, res) => {
   createSendToken(user, 200, res);
 });
 
-exports.updatePassword = async (req, res) => {
+exports.updatePassword = catchAsync ( async (req, res) => {
   //1)Get user from collection
   const user = await User.findById(req.user.id).select("+password");
   //2)Check if posted current pass is correct
@@ -195,4 +195,4 @@ exports.updatePassword = async (req, res) => {
   await user.save();
   //4)log user in , send jwt
   createSendToken(user, 200, res);
-};
+});
