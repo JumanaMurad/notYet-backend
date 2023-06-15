@@ -161,6 +161,7 @@ exports.addTeamMember = catchAsync(async (req, res) => {
     Click ${acceptUrl} if YES
     OR
     Click ${rejectUrl} if NO 
+
     `,
   });
 
@@ -228,13 +229,6 @@ exports.joinTeam = catchAsync(async (req, res) => {
       message: "You are already a team member or pending member",
     });
   }
-
-  // Edit the URLs here
-  const acceptUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
-  const rejectUrl = `http://localhost:3000/profile?teamId=${team._id}&userName=${user.username}`;
-
-  // Send an email to the team leader
-  // ...
 
   // Create a new team member object
   const newTeamMember = {
@@ -432,16 +426,143 @@ exports.rejectTeamJoinRequest = catchAsync(async (req, res) => {
   });
 });
 
+exports.LearderAcceptRequest = catchAsync (async(req,res)=>{
+  const teamId = req.params.teamId;
+  const { userId } = req.body;
+
+  const team = await Team.findById(teamId);
+  if (!team) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Team not found",
+    });
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({
+      status: "fail",
+      message: "User not found",
+    });
+  }
+
+  const pendingMemberIndex = team.pendingMembers.findIndex(member =>
+    member.user.equals(user._id) && member.role === 'member'
+  );
+
+  if (pendingMemberIndex === -1) {
+    return res.status(400).json({
+      status: "fail",
+      message: "User is not a pending member of the team",
+    });
+  }
+
+  // Remove the user from the pendingMembers list
+  team.pendingMembers.splice(pendingMemberIndex, 1);
+
+  // Remove the team's ID from the pendingTeams list of the user
+  const pendingTeamIndex = user.pendingTeams.findIndex(teamId =>
+    teamId.toString() === team._id.toString()
+  );
+
+  if (pendingTeamIndex !== -1) {
+    user.pendingTeams.splice(pendingTeamIndex, 1);
+  }
+
+  // Add the user to the teamMembers list of the team
+  team.teamMembers.push({ user: user._id, role: "member" });
+
+  // Add the team's ID to the joinedTeams list of the user
+  user.joinedTeams.push(team._id);
+
+  // Update the team and user models using the update function
+  await Team.updateOne(
+    { _id: team._id },
+    { $set: { pendingMembers: team.pendingMembers, teamMembers: team.teamMembers } }
+  );
+
+  await User.updateOne(
+    { _id: user._id },
+    { $set: { pendingTeams: user.pendingTeams, joinedTeams: user.joinedTeams } }
+  );
+
+  res.status(200).json({
+    status: "success",
+    message: "Request accepted successfully",
+    data: {
+      team,
+    },
+  });
+
+
+})
+
+exports.LeaderRejectRequest = catchAsync (async (req,res)=>{
+  const teamId = req.params.teamId;
+  const { userId } = req.body;
+  
+  const team = await Team.findById(teamId);
+  if (!team) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Team not found",
+    });
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({
+      status: "fail",
+      message: "User not found",
+    });
+  }
+
+  // Check if the user is a pending member of the team
+  const pendingMember = team.pendingMembers.find(member => member.user.equals(user._id) && member.role === 'member');
+
+  if (!pendingMember) {
+    return res.status(400).json({
+      status: "fail",
+      message: "User is not a pending member of the team",
+    });
+  }
+
+  // Remove the user from the pendingMembers list
+  team.pendingMembers.pull(pendingMember);
+
+  // Remove the team's ID from the pendingTeams list of the user
+  user.pendingTeams = user.pendingTeams.filter(teamId => teamId.toString() !== team._id.toString());
+
+  // Update the team and user models using the update function
+  await Team.findByIdAndUpdate({ _id: team._id }, { $set: { pendingMembers: team.pendingMembers } });
+  await User.findByIdAndUpdate({ _id: user._id }, { $set: { pendingTeams: user.pendingTeams } });
+
+  res.status(200).json({
+    status: "success",
+    message: "Request rejected successfully",
+    data: {
+      team,
+    },
+  });
+
+});
+
 
 exports.getPendingRequests = catchAsync(async (req, res) => {
   const { teamName } = req.body;
-  const team = await Team.findOne({ teamName });
+  const team = await Team.findOne({ teamName }).populate("pendingMembers.user");;
   if (!team) {
     return res.status(404).json({
       message: "Team not found",
     });
   }
-  const pendingMembers = team.pendingMembers;
+  const pendingMembers = team.pendingMembers.map((member) => {
+    return {
+      userName: member.user.username,
+     
+    };
+  });
+ 
   res.status(200).json({
     status: "success",
     data: { pendingMembers },
