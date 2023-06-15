@@ -1,12 +1,19 @@
-// Drawing.js
-
 const mongoose = require('mongoose');
 
-const drawingSchema = new mongoose.Schema({
+const Schema = mongoose.Schema;
+
+const drawingSchema = new Schema({
   data: {
     type: String,
     required: true
+  },
+  whiteboard: {
+    type: Schema.Types.ObjectId,
+    ref: 'Whiteboard',
+    required: true
   }
+}, {
+  timestamps: true
 });
 
 const Drawing = mongoose.model('Drawing', drawingSchema);

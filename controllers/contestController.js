@@ -4,6 +4,7 @@ const User = require('../models/userModel');
 const Problem = require('../models/problemModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
+const whiteboardController = require('./whiteboardController');
 
 
 exports.getAllContests = catchAsync(async (req, res) => {
@@ -190,7 +191,7 @@ contest.individualStanding.push(user._id);
 });
 
 
-// Needs to be tested
+
 exports.registerTeamForContest = catchAsync(async (req, res) => {
   const teamName = req.body.teamName;
   const contestId = req.params.id;
@@ -227,27 +228,30 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
   }
 
   // Check if any of the team members are already registered as contestants for the contest
-const isMemberRegistered = await Contest.exists({
-  _id: contestId,
-  contestants: {
-    $elemMatch: {
-      userId: { $in: team.teamMembers.map((member) => member.user) },
+  const isMemberRegistered = await Contest.exists({
+    _id: contestId,
+    contestants: {
+      $elemMatch: {
+        userId: { $in: team.teamMembers.map((member) => member.user) },
+      },
     },
-  },
-});
-
-if (isMemberRegistered) {
-  return res.status(400).json({
-    status: 'fail',
-    message: 'One or more team members are already registered as contestants for the contest',
   });
-}
 
+  if (isMemberRegistered) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'One or more team members are already registered as contestants for the contest',
+    });
+  }
 
-  // Add the team to the contest's teams list
+  // Create the whiteboard session and get the session ID
+  const sessionId = await whiteboardController.createWhiteboardSession(req, res, team._id);
+  console.log("Session Id:", sessionId)
+
+  // Add the team to the contest's teams list with the session ID
   const newTeamEntry = {
     teamId: team._id,
-    sessionId: team.sessionId,
+    sessionId: sessionId,
     numberOfSolvedProblems: 0,
     submittedProblems: [],
   };
@@ -288,6 +292,8 @@ if (isMemberRegistered) {
     },
   });
 });
+
+
 
 
 

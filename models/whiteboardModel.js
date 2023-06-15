@@ -1,11 +1,22 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const whiteboardSchema = new Schema({
-  sessionId: String,
-  data: String,
+  team: {
+    type: Schema.Types.ObjectId,
+    ref: 'Team',
+    required: true
+  },
+  session: {
+    type: String,
+    required: true
+  },
+  data: {
+    type: String,
+    default: ''
+  }
 });
 
-const Whiteboard = mongoose.model("whiteboard", whiteboardSchema);
+const Whiteboard = mongoose.model('Whiteboard', whiteboardSchema);
 
 module.exports = Whiteboard;
