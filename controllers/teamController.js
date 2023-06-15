@@ -148,8 +148,9 @@ exports.addTeamMember = catchAsync(async (req, res) => {
     }
   );
 
-  const acceptUrl = `http://localhost:3000/accept-team-request/${team._id}/${user.username}`;
-  const rejectUrl = `http://localhost:3000/reject-team-request/${team._id}/${user.username}`;
+  const acceptUrl = `http://localhost:3000/accept-team-request?teamId=${team._id}&userName=${user.username}`;
+  const rejectUrl = `http://localhost:3000/reject-team-request?teamId=${team._id}&userName=${user.username}`;
+
 
 
   await sendEmail({
@@ -230,8 +231,8 @@ exports.joinTeam = catchAsync(async (req, res) => {
     });
   }
 
-  const acceptUrl = `http://localhost:3000/accept-team-request/${team._id}/${user.username}`;
-  const rejectUrl = `http://localhost:3000/reject-team-request/${team._id}/${user.username}`;
+  const acceptUrl = `http://localhost:3000/accept-team-request?teamId=${team._id}&userName=${user.username}`;
+  const rejectUrl = `http://localhost:3000/reject-team-request?teamId=${team._id}&userName=${user.username}`;
 
   // Send an email to the team leader
   await sendEmail({
