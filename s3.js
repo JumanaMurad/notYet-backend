@@ -47,3 +47,30 @@ exports.removeFile = (fileKey) => {
 
     return s3.deleteObject(deleteParams).promise();
 };
+
+
+
+exports.uploadDrawingData = (base64ImageData) => {
+    const drawingDataBuffer = Buffer.from(base64ImageData, 'base64');
+    const drawingDataKey = 'drawing_data.png'; // Set a desired key for the drawing data file
+  
+    const uploadParams = {
+      Bucket: bucketName,
+      Body: drawingDataBuffer,
+      Key: drawingDataKey
+    };
+  
+    return s3.upload(uploadParams).promise();
+  };
+  
+  exports.getDrawingData = () => {
+    const drawingDataKey = 'drawing_data.png'; // Set the key for the drawing data file
+  
+    const downloadParams = {
+      Key: drawingDataKey,
+      Bucket: bucketName
+    };
+  
+    return s3.getObject(downloadParams).promise()
+      .then((data) => data.Body);
+  };

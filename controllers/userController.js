@@ -99,7 +99,7 @@ exports.getProfilePicture = catchAsync( async (req, res) => {
   const key = req.params.key;
   const readStream = uploadFile.getFileStream(key);
 
-  console.log(readStream.pipe(res));
+  readStream.pipe(res);
 });
 
 exports.getAllUsers = catchAsync(async (req, res) => {
