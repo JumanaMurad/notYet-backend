@@ -21,8 +21,8 @@ router
   router.patch('/accept-team-request/:teamId/:userName', teamController.acceptTeamJoinRequest);
   router.patch('/reject-team-request/:teamId/:userName', teamController.rejectTeamJoinRequest);
   
-  router.patch('/leader-accept-team-request/:teamId', teamController.LearderAcceptRequest);
-  router.patch('/leader-reject-team-request/:teamId', teamController.LeaderRejectRequest);
+  //router.patch('/leader-accept-team-request/:teamId', teamController.LearderAcceptRequest);
+  //router.patch('/leader-reject-team-request/:teamId', teamController.LeaderRejectRequest);
   
 
 

@@ -191,7 +191,7 @@ exports.joinTeam = catchAsync(async (req, res) => {
   const userId = req.user._id;
 
   // Find the team by teamName
-  const team = await Team.findOne({ teamName: teamName });
+  const team = await Team.findOne({ teamName: teamName }).populate('teamMembers.user');
 
   if (!team) {
     return res.status(404).json({
@@ -229,6 +229,21 @@ exports.joinTeam = catchAsync(async (req, res) => {
       message: "You are already a team member or pending member",
     });
   }
+
+  const acceptUrl = `http://localhost:3000/accept-team-request/${team._id}/${user.username}`;
+  const rejectUrl = `http://localhost:3000/reject-team-request/${team._id}/${user.username}`;
+
+  // Send an email to the team leader
+  await sendEmail({
+    email: team.teamMembers.find(member => member.role === 'team-leader').user.email,
+    subject: `Team Join Request`,
+    message: `Hello ,
+      ${user.username} has requested to join your team ${team.teamName}.
+      Please accept or reject the request by clicking the links below:
+      Accept: ${acceptUrl}
+      Reject: ${rejectUrl}
+    `,
+  });
 
   // Create a new team member object
   const newTeamMember = {
@@ -309,66 +324,52 @@ exports.editTeamName = catchAsync(async (req, res) => {
 
 exports.acceptTeamJoinRequest = catchAsync(async (req, res) => {
   const { teamId, userName } = req.params;
-
   const team = await Team.findById(teamId);
-
   if (!team) {
     return res.status(404).json({
       status: "fail",
       message: "Team not found",
     });
   }
-
   const user = await User.findOne({ username: userName });
-
   if (!user) {
     return res.status(404).json({
       status: "fail",
       message: "User not found",
     });
   }
-
   // Check if the user is a pending member of the team
   const pendingMemberIndex = team.pendingMembers.findIndex(member =>
     member.user.equals(user._id) && member.role === 'member'
   );
-
   if (pendingMemberIndex === -1) {
     return res.status(400).json({
       status: "fail",
       message: "User is not a pending member of the team",
     });
   }
-
   // Remove the user from the pendingMembers list
   team.pendingMembers.splice(pendingMemberIndex, 1);
-
   // Remove the team's ID from the pendingTeams list of the user
   const pendingTeamIndex = user.pendingTeams.findIndex(teamId =>
     teamId.toString() === team._id.toString()
   );
-
   if (pendingTeamIndex !== -1) {
     user.pendingTeams.splice(pendingTeamIndex, 1);
   }
-
   // Add the user to the teamMembers list of the team
   team.teamMembers.push({ user: user._id, role: "member" });
-
   // Add the team's ID to the joinedTeams list of the user
   user.joinedTeams.push(team._id);
-
   // Update the team and user models using the update function
   await Team.updateOne(
     { _id: team._id },
     { $set: { pendingMembers: team.pendingMembers, teamMembers: team.teamMembers } }
   );
-
   await User.updateOne(
     { _id: user._id },
     { $set: { pendingTeams: user.pendingTeams, joinedTeams: user.joinedTeams } }
   );
-
   res.status(200).json({
     status: "success",
     message: "Request accepted successfully",
@@ -380,9 +381,7 @@ exports.acceptTeamJoinRequest = catchAsync(async (req, res) => {
 
 exports.rejectTeamJoinRequest = catchAsync(async (req, res) => {
   const { teamId, userName } = req.params;
-
   const team = await Team.findById(teamId);
-
   if (!team) {
     return res.status(404).json({
       status: "fail",
@@ -396,23 +395,18 @@ exports.rejectTeamJoinRequest = catchAsync(async (req, res) => {
       message: "User not found",
     });
   }
-
   // Check if the user is a pending member of the team
   const pendingMember = team.pendingMembers.find(member => member.user.equals(user._id) && member.role === 'member');
-
   if (!pendingMember) {
     return res.status(400).json({
       status: "fail",
       message: "User is not a pending member of the team",
     });
   }
-
   // Remove the user from the pendingMembers list
   team.pendingMembers.pull(pendingMember);
-
   // Remove the team's ID from the pendingTeams list of the user
   user.pendingTeams = user.pendingTeams.filter(teamId => teamId.toString() !== team._id.toString());
-
   // Update the team and user models using the update function
   await Team.findByIdAndUpdate({ _id: team._id }, { $set: { pendingMembers: team.pendingMembers } });
   await User.findByIdAndUpdate({ _id: user._id }, { $set: { pendingTeams: user.pendingTeams } });
@@ -558,7 +552,7 @@ exports.getPendingRequests = catchAsync(async (req, res) => {
   }
   const pendingMembers = team.pendingMembers.map((member) => {
     return {
-      userName: member.user.username,
+      username: member.user.username,
      
     };
   });
