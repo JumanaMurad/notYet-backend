@@ -550,13 +550,19 @@ exports.LeaderRejectRequest = catchAsync (async (req,res)=>{
 
 exports.getPendingRequests = catchAsync(async (req, res) => {
   const { teamName } = req.body;
-  const team = await Team.findOne({ teamName });
+  const team = await Team.findOne({ teamName }).populate("pendingMembers.user");;
   if (!team) {
     return res.status(404).json({
       message: "Team not found",
     });
   }
-  const pendingMembers = team.pendingMembers;
+  const pendingMembers = team.pendingMembers.map((member) => {
+    return {
+      userName: member.user.username,
+     
+    };
+  });
+ 
   res.status(200).json({
     status: "success",
     data: { pendingMembers },
