@@ -3,33 +3,6 @@ const Drawing = require('../models/drawingModel');
 const catchAsync = require('../utils/catchAsync');
 
 
-// Function to update the whiteboard data for a team
-exports.updateWhiteboardData = async (req, res) => {
-  try {
-    const { teamId, session, data } = req.body;
-
-    // Find the whiteboard session for the team
-    const whiteboard = await Whiteboard.findOne({ team: teamId, session: session });
-
-    if (!whiteboard) {
-      return res.status(404).json({ message: 'Whiteboard session not found' });
-    }
-
-    // Update the whiteboard data
-    whiteboard.data = data;
-
-    // Save the updated whiteboard session
-    await whiteboard.save();
-
-    res.sendStatus(200);
-  } catch (error) {
-    console.error('Error updating whiteboard data:', error);
-    res.sendStatus(500);
-  }
-};
-
-
-
 // Function to retrieve sketch data from the database
 exports.getSketchData = catchAsync(async (req, res) => {
   const sessionId = req.params.sessionId;
@@ -57,9 +30,56 @@ exports.getSketchData = catchAsync(async (req, res) => {
   if (!sketchData) {
     return res.status(404).json({ message: 'No sketch data found for the whiteboard' });
   }
-
-  console.log(sketchData)
-  res.json(sketchData);
+  
+  res.status(200).json({
+    status: 'success',
+    drawing: {
+      sketchData
+    }
+  });
 });
 
+// Function to get a whiteboard by session ID
+exports.getWhiteboard = catchAsync(async (req, res) => {
+  const sessionId = req.params.sessionId;
 
+  // Find the whiteboard by session ID
+  const whiteboard = await Whiteboard.findOne({ session: sessionId });
+
+  if (!whiteboard) {
+    return res.status(404).json({ message: 'Whiteboard not found' });
+  }
+
+  return res.status(200).json({
+    status: 'success',
+    whiteboard: {
+      whiteboard
+    }
+  });
+});
+
+// Function to delete a whiteboard by session ID
+exports.deleteWhiteboard = catchAsync(async (req, res) => {
+  const sessionId = req.params.sessionId;
+
+  // Find the whiteboard by session ID
+  const whiteboard = await Whiteboard.findOne({ session: sessionId });
+
+  if (!whiteboard) {
+    return res.status(404).json({ message: 'Whiteboard not found' });
+  }
+
+  // Get the drawing IDs associated with the whiteboard
+  const drawingIds = whiteboard.drawings;
+
+  // Delete all the associated drawings
+  await Drawing.deleteMany({ _id: { $in: drawingIds } });
+
+  // Delete the whiteboard
+  await whiteboard.remove();
+
+  return res.status(200).json({
+    status: 'success',
+    message: 'Whiteboard and associated drawings deleted'
+  });
+});
