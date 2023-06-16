@@ -5,6 +5,8 @@ const Problem = require('../models/problemModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const whiteboardController = require('./whiteboardController');
+const Whiteboard = require('../models/whiteboardModel');
+const { v4: uuidv4 } = require("uuid");
 
 
 exports.getAllContests = catchAsync(async (req, res) => {
@@ -157,14 +159,14 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     });
   }
 
-// Add the user to the contest's users list and individual standing list
-contest.users.push({
-  userId: user._id,
-  numberOfSolvedProblems: 0,
-});
+  // Add the user to the contest's users list and individual standing list
+  contest.users.push({
+    userId: user._id,
+    numberOfSolvedProblems: 0,
+  });
 
-// Add the user to the contest's individual standing list
-contest.individualStanding.push(user._id);
+  // Add the user to the contest's individual standing list
+  contest.individualStanding.push(user._id);
 
   // Add the user to the contest's contestants list
   contest.contestants.push({
@@ -245,8 +247,13 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
   }
 
   // Create the whiteboard session and get the session ID
-  const sessionId = await whiteboardController.createWhiteboardSession(req, res, team._id);
-  console.log("Session Id:", sessionId)
+
+  // Generate a unique session ID
+  const sessionId = uuidv4();
+
+  // Update the existing Whiteboard document for the team
+const whiteboard = new Whiteboard({ team: team._id, session: sessionId });
+await whiteboard.save();
 
   // Add the team to the contest's teams list with the session ID
   const newTeamEntry = {
@@ -256,7 +263,11 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
     submittedProblems: [],
   };
 
-  await contest.updateOne({ $push: { teams: newTeamEntry } });
+  // Update the contest and return the updated document
+  await Contest.findOneAndUpdate(
+    { _id: contestId },
+    { $push: { teams: newTeamEntry } }
+  );
 
   // Add all team members to the contestants list with the teamId
   const newContestantEntries = team.teamMembers.map((member) => ({
@@ -264,7 +275,7 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
     teamId: team._id,
   }));
 
-  await contest.updateOne({ $push: { contestants: { $each: newContestantEntries } } });
+  await Contest.updateOne({ _id: contestId }, { $push: { contestants: { $each: newContestantEntries } } });
 
   // Add the contest ID to the contests list for each team member
   for (const member of team.teamMembers) {
@@ -278,30 +289,31 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
             registerationType: 'team',
           },
         },
-      }
+      },
+      { new: true }
     );
   }
 
   // Add the team ID to the teamStanding list
-  await contest.updateOne({ $push: { teamStanding: team._id } });
+  await Contest.updateOne({ _id: contestId }, { $push: { teamStanding: team._id } });
+
+  // Fetch the updated contest document
+  const updatedContest = await Contest.findById(contestId);
 
   res.status(201).json({
     status: 'success',
     data: {
-      contest,
+      contest: updatedContest,
     },
   });
 });
 
 
 
-
-
-
 exports.teamStanding = catchAsync(async (req, res) => {
 
   const contest = await Contest.findById(req.params.id);
-  
+
   if (!contest) {
     return res.status(404).json({
       status: 'fail',

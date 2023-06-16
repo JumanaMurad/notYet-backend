@@ -17,6 +17,7 @@ const roadmapRouter = require("./routes/roadmapRoutes");
 const questionRouter = require("./routes/questionRoutes");
 const sessionRouter = require("./routes/sessionRoutes");
 const drawingRoutes = require('./routes/drawingRoutes');
+const whiteboardRoutes = require('./routes/whiteboardRoutes');
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use("/questions", questionRouter);
 app.use("/session", sessionRouter);
 // Mount the drawingRoutes middleware
 app.use('/drawing', drawingRoutes);
+app.use('/whiteboard', whiteboardRoutes);
 
 
 app.all("*", (req, res, next) => {

@@ -11,10 +11,12 @@ const whiteboardSchema = new Schema({
     type: String,
     required: true
   },
-  data: {
-    type: String,
-    default: ''
-  }
+  drawings: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Drawing'
+    }
+]
 });
 
 const Whiteboard = mongoose.model('Whiteboard', whiteboardSchema);

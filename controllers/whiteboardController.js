@@ -1,29 +1,7 @@
 const Whiteboard = require('../models/whiteboardModel');
-const { v4: uuidv4 } = require("uuid");
+const Drawing = require('../models/drawingModel');
+const catchAsync = require('../utils/catchAsync');
 
-// Function to create a whiteboard session for a team
-exports.createWhiteboardSession = async (req, res, teamId) => {
-  try {
-
-    // Generate a unique session ID
-    const session = uuidv4();
-
-    // Create a new Whiteboard document for the team
-    const whiteboard = new Whiteboard({
-      team: teamId,
-      session: session
-    });
-
-    // Save the whiteboard session to the database
-    await whiteboard.save();
-
-    // res.json({ session });
-    return session
-  } catch (error) {
-    console.error('Error creating whiteboard session:', error);
-    res.sendStatus(500);
-  }
-};
 
 // Function to update the whiteboard data for a team
 exports.updateWhiteboardData = async (req, res) => {
@@ -49,5 +27,39 @@ exports.updateWhiteboardData = async (req, res) => {
     res.sendStatus(500);
   }
 };
+
+
+
+// Function to retrieve sketch data from the database
+exports.getSketchData = catchAsync(async (req, res) => {
+  const sessionId = req.params.sessionId;
+
+  // Find the whiteboard session
+  const whiteboard = await Whiteboard.findOne({ session: sessionId });
+
+  if (!whiteboard) {
+    return res.status(404).json({ message: 'Whiteboard session not found' });
+  }
+
+  // Retrieve the list of drawing IDs from the whiteboard
+  const drawingIds = whiteboard.drawings;
+
+  // Check if there are any drawing IDs in the list
+  if (drawingIds.length === 0) {
+    return res.status(404).json({ message: 'No drawings found for the whiteboard' });
+  }
+
+  // Retrieve the latest drawing from the list of drawing IDs
+  const lastDrawingId = drawingIds[drawingIds.length - 1];
+
+  const sketchData = await Drawing.findById(lastDrawingId);
+
+  if (!sketchData) {
+    return res.status(404).json({ message: 'No sketch data found for the whiteboard' });
+  }
+
+  console.log(sketchData)
+  res.json(sketchData);
+});
 
 

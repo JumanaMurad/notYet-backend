@@ -5,7 +5,6 @@ const drawingController = require('../controllers/drawingController');
 // POST route for creating a drawing
 router.post('/', drawingController.saveSketchData);
 
-// GET route for retrieving sketch data
-router.get('/sketchData', drawingController.getSketchData);
+router.get('/:id', drawingController.getDrawing);
 
 module.exports = router;

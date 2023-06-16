@@ -6,11 +6,6 @@ const drawingSchema = new Schema({
   data: {
     type: String,
     required: true
-  },
-  whiteboard: {
-    type: Schema.Types.ObjectId,
-    ref: 'Whiteboard',
-    required: true
   }
 }, {
   timestamps: true
