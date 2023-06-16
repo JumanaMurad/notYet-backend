@@ -2,9 +2,6 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
 const app = require("./app");
-const { v4: uuidv4 } = require("uuid");
-const drawingController = require("./controllers/drawingController");
-
 
 // Connect to the MongoDB database
 const DB = process.env.DATABASE.replace(

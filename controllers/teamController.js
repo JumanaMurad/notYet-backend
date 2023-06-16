@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require("./../utils/catchAsync");
 const sendEmail = require("../utils/email");
+const contestController = require('./contestController')
 
 
 
@@ -288,14 +289,33 @@ exports.deleteTeam = catchAsync(async (req, res) => {
     });
   }
 
+  contestController.removeTeamFromContests(teamId);
+
   // Delete the team
   await team.remove();
+
+  // Remove team ID from joinedTeams list in user
+  req.user.joinedTeams = req.user.joinedTeams.filter(
+    (team) => team.toString() !== teamId
+  );
+
+  // Remove team ID from pendingTeams list in user
+  req.user.pendingTeams = req.user.pendingTeams.filter(
+    (team) => team.toString() !== teamId
+  );
+
+  // Update the user in the database
+  await User.findByIdAndUpdate(req.user._id, {
+    joinedTeams: req.user.joinedTeams,
+    pendingTeams: req.user.pendingTeams,
+  });
 
   res.status(200).json({
     status: "success",
     message: "Team deleted successfully",
   });
 });
+
 
 exports.editTeamName = catchAsync(async (req, res) => {
   const teamId = req.params.id;

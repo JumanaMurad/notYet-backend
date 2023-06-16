@@ -26,7 +26,7 @@ const UserSchema = new Schema({
    },
    role : {
       type : String,
-      enum : ['user','admin','team-leader'],
+      enum : ['user','admin'],
       default : 'user'
    },
    password : {
@@ -103,7 +103,11 @@ const UserSchema = new Schema({
    pendingTeams: [{
       type: Schema.Types.ObjectId,
       ref: 'Team'
-   }]
+   }],
+   sessionId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Whiteboard'
+   }
    }  
 );
 

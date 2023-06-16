@@ -368,3 +368,26 @@ exports.individualStanding = catchAsync(async (req, res) => {
   });
   //  console.log(contest.individualStanding);
 });
+
+
+// Function to remove team ID from contests
+exports.removeTeamFromContests = catchAsync(async (teamId) => {
+    // Update the contests that have the team ID in the teams list
+    await Contest.updateMany(
+      { 'teams.teamId': teamId },
+      { $pull: { 'teams': { teamId: teamId } } }
+    );
+
+    // Update the teams that have the contest ID in the contests list
+    await Contest.updateMany(
+      { 'contestants.teamId': teamId },
+      { $pull: { 'contestants': { teamId: teamId } } }
+    );
+
+    // Remove the team ID from the teamStanding list
+    await Contest.updateMany(
+      { 'teamStanding': teamId },
+      { $pull: { 'teamStanding': teamId } }
+    );
+}
+);
