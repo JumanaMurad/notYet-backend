@@ -9,7 +9,7 @@ router
   .post(quizController.createQuiz);
 
 router
-  .route("/:id")
+  .route("/getQuiz")
   .get(quizController.getQuiz)
   .patch(quizController.updateQuiz)
   .delete(quizController.deleteQuiz);

@@ -16,7 +16,10 @@ exports.getAllQuizes = catchAsync(async (req, res) => {
 });
 
 exports.getQuiz = catchAsync(async (req, res) => {
-  const quiz = await Quiz.findById(req.params.id);
+  const count = await Quiz.countDocuments(); // Get the total count of quizzes
+  const randomIndex = Math.floor(Math.random() * count); // Generate a random index within the range of quiz count
+
+  const quiz = await Quiz.findOne().skip(randomIndex); // Retrieve a random quiz by skipping to the random index
 
   res.status(200).json({
     status: "success",
@@ -25,6 +28,7 @@ exports.getQuiz = catchAsync(async (req, res) => {
     },
   });
 });
+
 
 /* exports.createQuiz = async (req, res) => {
     try{
@@ -104,13 +108,10 @@ exports.createQuiz = catchAsync(async (req, res) => {
       message: "Error in generating questions",
     });
   }
-
   const quiz = new Quiz({
     questions: [...easyQuestionIds, ...mediumQuestionIds, ...hardQuestionIds],
   });
-
   await quiz.save();
-
   res.status(201).json({
     status: "success",
     data: quiz,
