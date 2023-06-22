@@ -55,7 +55,6 @@ app.use("/contests", contestRouter);
 app.use("/roadmaps", roadmapRouter);
 app.use("/questions", questionRouter);
 
-// Mount the drawingRoutes middleware
 app.use('/drawing', drawingRoutes);
 app.use('/whiteboard', whiteboardRoutes);
 

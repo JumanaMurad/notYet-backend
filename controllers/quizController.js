@@ -119,24 +119,24 @@ exports.createQuiz = catchAsync(async (req, res) => {
 });
 
 exports.updateUserQuizEvaluation = catchAsync(async (req, res) => {
-  const user = await User.findById(req.user);
+  const userId = req.user;
 
-  if (!user) {
+  const updatedUser = await User.updateOne(
+    { _id: userId },
+    { $set: { quizEvaluation: req.body.quizEvaluation } }
+  );
+
+  if (updatedUser.n === 0) {
     return res.status(404).json({
       status: "error",
       message: "User not found",
     });
   }
 
-  const quizEvaluation = req.body.quizEvaluation;
-  user.quizEvaluation = quizEvaluation;
-
-  //await user.save();
-
   res.status(200).json({
     status: "success",
     data: {
-      user,
+      user: updatedUser,
     },
   });
 });
