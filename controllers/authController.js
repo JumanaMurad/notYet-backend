@@ -5,6 +5,9 @@ const User = require("../models/userModel");
 const sendEmail = require("../utils/email");
 const AppError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
+const Whiteboard = require('../models/whiteboardModel');
+const { v4: uuidv4 } = require("uuid");
+
 
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
@@ -30,7 +33,13 @@ exports.signup = catchAsync(async (req, res) => {
 
   newUser.emailVerificationToken = token;
 
+   // Generate a unique session ID
+  const sessionId = uuidv4();
+  newUser.sessionId = sessionId;
   await newUser.save();
+
+  // Create a new Whiteboard document
+  const whiteboard = await Whiteboard.create({ users: [newUser._id], session: sessionId });
 
   // Construct the verification URL
   const verificationUrl = `http://localhost:3000/login/VerifyEmail?emailVerificationToken=${token}`;

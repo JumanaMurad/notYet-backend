@@ -105,8 +105,8 @@ const UserSchema = new Schema({
       ref: 'Team'
    }],
    sessionId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Whiteboard'
+      type: String,
+      required: true
    }
    }  
 );
