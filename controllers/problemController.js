@@ -17,7 +17,7 @@ exports.getAllProblems = catchAsync(async (req, res) => {
     .paginate();
 
   const problems = await features.query;
-  
+
   if (!problems) {
     return next(new AppError("not found", 404));
   }
@@ -89,6 +89,14 @@ exports.deleteProblem = catchAsync(async (req, res) => {
 
   contestController.removeProblemFromContests(problemId);
 
+  const userIdsToUpdate = problem.users;
+
+  // Remove the problem from users' submittedProblems list
+  await User.updateMany(
+    { _id: { $in: userIdsToUpdate } },
+    { $pull: { submittedProblems: { problem: problemId } } }
+  );
+
   // Delete the problem
   await problem.remove();
 
@@ -119,107 +127,107 @@ exports.userSubmitContestProblem = catchAsync(async (req, res) => {
   const problemId = req.params.id; // Retrieve problem ID from req.params
   const user = req.user;
 
-// Retrieve problem inputs and outputs
-const problem = await Problem.findById(problemId);
+  // Retrieve problem inputs and outputs
+  const problem = await Problem.findById(problemId);
 
-if (!problem) {
-  return res.status(404).json({ message: "Problem not found" });
-}
-
-if (!user) {
-  return res.status(404).json({ message: "User not found" });
-}
-
-// Find the contest object
-const contest = await Contest.findById(contestId);
-if (!contest) {
-  return res.status(404).json({ message: "Contest not found" });
-}
-
-// Find the team object within the list of teams included in the contest
-const contestant = contest.users.find(
-  (userObj) => userObj.userId.toString() === user._id.toString()
-);
-if (!contestant) {
-  return res.status(404).json({ message: "User is not found in the contest" });
-}
-
-// Find the problem based on the ID in the contest
-const contestProblem = contest.problems.find(
-  (problem) => problem._id.toString() === problemId.toString()
-);
-if (!contestProblem) {
-  return res.status(404).json({ message: "Problem not found in contest" });
-}
-
-// Check if the team has already submitted the problem
-const hasSubmittedProblem = contestant.solvedProblems.includes(problemId.toString());
-
-if (hasSubmittedProblem) {
-  return res
-    .status(400)
-    .json({ message: "Problem already submitted before" });
-}
-
-// Combine the inputs and hiddenInputs arrays into a single inputs array
-const inputs = [...problem.inputs, ...problem.hiddenInputs];
-
-// Combine the outputs and hiddenOutputs arrays into a single outputs array
-const outputs = [...problem.outputs, ...problem.hiddenOutputs];
-
-// Create an array to store the submission results
-const submissionResults = [];
-
-let allAccepted = true; // Track if all test cases are accepted
-
- // Iterate over the inputs and expected outputs
- for (let i = 0; i < inputs.length; i++) {
-  const stdin = inputs[i];
-  const expectedOutput = outputs[i];
-
-  // Call the submit function asynchronously for each input-output pair
-  const status = await exports.submit(code, language, stdin, expectedOutput);
-
-  // Add the result to the submissionResults array
-  submissionResults.push({
-    input: stdin,
-    expectedOutput: expectedOutput,
-    status: status || "Pending",
-  });
-
-  // If the status is not 'Accepted', mark allAccepted as false and stop submitting further test cases
-  if (status !== "Accepted") {
-    allAccepted = false;
-    const testCaseNumber = i + 1;
-    
-    return res.status(400).json({
-      message: `${status} on test ${testCaseNumber}`,
-      status: submissionResults
-    });
+  if (!problem) {
+    return res.status(404).json({ message: "Problem not found" });
   }
-}
 
-// Update the problem's status based on the overall result
-const problemStatus = allAccepted
-? "Accepted"
-: submissionResults[submissionResults.length - 1].status;
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
-// If the problem is accepted and the team hasn't submitted it before, increment the number of solved problems
-if (allAccepted && !hasSubmittedProblem) {
-contestant.numberOfSolvedProblems = (contestant.numberOfSolvedProblems || 0) + 1;
-}
+  // Find the contest object
+  const contest = await Contest.findById(contestId);
+  if (!contest) {
+    return res.status(404).json({ message: "Contest not found" });
+  }
 
-// Add the submitted problem to the team's submittedProblems array
-contestant.solvedProblems.push(problem._id);
+  // Find the team object within the list of teams included in the contest
+  const contestant = contest.users.find(
+    (userObj) => userObj.userId.toString() === user._id.toString()
+  );
+  if (!contestant) {
+    return res.status(404).json({ message: "User is not found in the contest" });
+  }
 
-// Update the team's solved problems count and submitted problems array within the contest object
-await contest.save();
+  // Find the problem based on the ID in the contest
+  const contestProblem = contest.problems.find(
+    (problem) => problem._id.toString() === problemId.toString()
+  );
+  if (!contestProblem) {
+    return res.status(404).json({ message: "Problem not found in contest" });
+  }
 
-// Send success response
-res.status(200).json({
-message: "Problem submitted successfully",
-status: submissionResults,
-});
+  // Check if the team has already submitted the problem
+  const hasSubmittedProblem = contestant.solvedProblems.includes(problemId.toString());
+
+  if (hasSubmittedProblem) {
+    return res
+      .status(400)
+      .json({ message: "Problem already submitted before" });
+  }
+
+  // Combine the inputs and hiddenInputs arrays into a single inputs array
+  const inputs = [...problem.inputs, ...problem.hiddenInputs];
+
+  // Combine the outputs and hiddenOutputs arrays into a single outputs array
+  const outputs = [...problem.outputs, ...problem.hiddenOutputs];
+
+  // Create an array to store the submission results
+  const submissionResults = [];
+
+  let allAccepted = true; // Track if all test cases are accepted
+
+  // Iterate over the inputs and expected outputs
+  for (let i = 0; i < inputs.length; i++) {
+    const stdin = inputs[i];
+    const expectedOutput = outputs[i];
+
+    // Call the submit function asynchronously for each input-output pair
+    const status = await exports.submit(code, language, stdin, expectedOutput);
+
+    // Add the result to the submissionResults array
+    submissionResults.push({
+      input: stdin,
+      expectedOutput: expectedOutput,
+      status: status || "Pending",
+    });
+
+    // If the status is not 'Accepted', mark allAccepted as false and stop submitting further test cases
+    if (status !== "Accepted") {
+      allAccepted = false;
+      const testCaseNumber = i + 1;
+
+      return res.status(400).json({
+        message: `${status} on test ${testCaseNumber}`,
+        status: submissionResults
+      });
+    }
+  }
+
+  // Update the problem's status based on the overall result
+  const problemStatus = allAccepted
+    ? "Accepted"
+    : submissionResults[submissionResults.length - 1].status;
+
+  // If the problem is accepted and the team hasn't submitted it before, increment the number of solved problems
+  if (allAccepted && !hasSubmittedProblem) {
+    contestant.numberOfSolvedProblems = (contestant.numberOfSolvedProblems || 0) + 1;
+  }
+
+  // Add the submitted problem to the team's submittedProblems array
+  contestant.solvedProblems.push(problem._id);
+
+  // Update the team's solved problems count and submitted problems array within the contest object
+  await contest.save();
+
+  // Send success response
+  res.status(200).json({
+    message: "Problem submitted successfully",
+    status: submissionResults,
+  });
 
 
 });
@@ -285,10 +293,10 @@ exports.teamSubmitContestsProblem = catchAsync(async (req, res) => {
 
 
   // Combine the inputs and hiddenInputs arrays into a single inputs array
-const inputs = [...problem.inputs, ...problem.hiddenInputs];
+  const inputs = [...problem.inputs, ...problem.hiddenInputs];
 
-// Combine the outputs and hiddenOutputs arrays into a single outputs array
-const outputs = [...problem.outputs, ...problem.hiddenOutputs];
+  // Combine the outputs and hiddenOutputs arrays into a single outputs array
+  const outputs = [...problem.outputs, ...problem.hiddenOutputs];
 
   // Create an array to store the submission results
   const submissionResults = [];
@@ -358,10 +366,10 @@ exports.submitProblem = catchAsync(async (req, res) => {
   }
 
   // Combine the inputs and hiddenInputs arrays into a single inputs array
-const inputs = [...problem.inputs, ...problem.hiddenInputs];
+  const inputs = [...problem.inputs, ...problem.hiddenInputs];
 
-// Combine the outputs and hiddenOutputs arrays into a single outputs array
-const outputs = [...problem.outputs, ...problem.hiddenOutputs];
+  // Combine the outputs and hiddenOutputs arrays into a single outputs array
+  const outputs = [...problem.outputs, ...problem.hiddenOutputs];
 
   // Create an array to store the submission results
   const submissionResults = [];
@@ -421,7 +429,8 @@ const outputs = [...problem.outputs, ...problem.hiddenOutputs];
     status: problemStatus,
   });
 
-
+  // Update the user in the database
+  await User.updateOne({ _id: userId }, user);
 
   // Update the user and problem in the database
   await User.updateOne({ _id: userId }, user);
