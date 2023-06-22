@@ -82,6 +82,9 @@ const UserSchema = new Schema({
       registerationType: {
          type: String,
          enum: ['individual', 'team']
+      },
+      sessionId: {
+         type: String
       }
    }],
    roadMap : {

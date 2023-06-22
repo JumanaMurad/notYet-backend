@@ -186,6 +186,7 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
   user.contests.push({
     contestId: contestId,
     registerationType: 'individual', // Add the registration type
+    sessionId: sessionId
   });
 
   // Update the contest and user data
@@ -295,6 +296,7 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
           contests: {
             contestId: contestId,
             registerationType: 'team',
+            sessionId: sessionId,
           },
         },
       },
