@@ -4,13 +4,19 @@ const Schema = mongoose.Schema;
 const whiteboardSchema = new Schema({
   team: {
     type: Schema.Types.ObjectId,
-    ref: 'Team',
-    required: true
+    ref: 'Team'
   },
   session: {
     type: String,
+    unique: true,
     required: true
   },
+  users: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
   drawings: [
     {
       type: Schema.Types.ObjectId,

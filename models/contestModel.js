@@ -17,45 +17,48 @@ const contestSchema = new Schema({
         required: true
     },
     users: [{
-        userId : {
+        userId: {
             type: Schema.Types.ObjectId,
-            ref: 'User' 
-    },
-        numberOfSolvedProblems : {
-            type : Number,
+            ref: 'User'
+        },
+        numberOfSolvedProblems: {
+            type: Number,
             default: 0
-           },
-        solvedProblems : [{
+        },
+        solvedProblems: [{
             type: Schema.Types.ObjectId,
             ref: 'Problem'
-           }]
+        }]
     }],
     contestants: [{
-        userId : {
+        userId: {
             type: Schema.Types.ObjectId,
-            ref: 'User' 
-    },
-        teamId : {
-            type : Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        teamId: {
+            type: Schema.Types.ObjectId,
             ref: 'Team'
-           },
+        },
+        sessionId: {
+            type: String
+        },
     }],
     teams: [{
-        teamId : {
-            type:  Schema.Types.ObjectId,
+        teamId: {
+            type: Schema.Types.ObjectId,
             ref: 'Team'
-       }, 
-       sessionId : {
-        type : String
-       },
-       numberOfSolvedProblems : {
-        type : Number,
-        default: 0
-       },
-       solvedProblems : [{
-        type: Schema.Types.ObjectId,
-        ref: 'Problem'
-       }]
+        },
+        sessionId: {
+            type: String
+        },
+        numberOfSolvedProblems: {
+            type: Number,
+            default: 0
+        },
+        solvedProblems: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Problem'
+        }]
     }],
     problems: [{
         type: Schema.Types.ObjectId,

@@ -6,6 +6,7 @@ const User = require("../models/userModel");
 const Team = require("../models/teamModel");
 const Contest = require("../models/contestModel");
 const judge0Utils = require("../utils/judge0Utils");
+const contestController = require('./contestController');
 
 exports.getAllProblems = catchAsync(async (req, res) => {
   // EXECUTE A QUERY
@@ -75,7 +76,22 @@ exports.updateProblem = catchAsync(async (req, res) => {
 });
 
 exports.deleteProblem = catchAsync(async (req, res) => {
-  await Problem.findByIdAndDelete(req.params.id);
+  const problemId = req.params.id;
+
+  const problem = await Problem.findById(problemId);
+
+  if (!problem) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Problem not found",
+    });
+  }
+
+  contestController.removeProblemFromContests(problemId);
+
+  // Delete the problem
+  await problem.remove();
+
   res.status(204).json({
     status: "success",
     data: null,
@@ -328,7 +344,6 @@ const outputs = [...problem.outputs, ...problem.hiddenOutputs];
   });
 });
 
-// team.teamMembers.includes(req.user._id) &&
 
 exports.submitProblem = catchAsync(async (req, res) => {
   const userId = req.user._id;
@@ -405,6 +420,8 @@ const outputs = [...problem.outputs, ...problem.hiddenOutputs];
     problem: problem._id, // Store problem id
     status: problemStatus,
   });
+
+
 
   // Update the user and problem in the database
   await User.updateOne({ _id: userId }, user);

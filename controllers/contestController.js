@@ -159,6 +159,13 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
     });
   }
 
+  // Generate a unique session ID
+  const sessionId = uuidv4();
+
+  // Update the existing Whiteboard document for the team
+  const whiteboard = new Whiteboard({users: [user._id], session: sessionId });
+  await whiteboard.save();
+
   // Add the user to the contest's users list and individual standing list
   contest.users.push({
     userId: user._id,
@@ -171,6 +178,7 @@ exports.registerUserForContest = catchAsync(async (req, res) => {
   // Add the user to the contest's contestants list
   contest.contestants.push({
     userId: user._id,
+    sessionId: sessionId,
     teamId: null, // Since this is an individual registration, the teamId can be set to null
   });
 
@@ -252,13 +260,12 @@ exports.registerTeamForContest = catchAsync(async (req, res) => {
   const sessionId = uuidv4();
 
   // Update the existing Whiteboard document for the team
-const whiteboard = new Whiteboard({ team: team._id, session: sessionId });
-await whiteboard.save();
+  const whiteboard = new Whiteboard({ team: team._id, session: sessionId });
+  await whiteboard.save();
 
   // Add the team to the contest's teams list with the session ID
   const newTeamEntry = {
     teamId: team._id,
-    sessionId: sessionId,
     numberOfSolvedProblems: 0,
     submittedProblems: [],
   };
@@ -272,6 +279,7 @@ await whiteboard.save();
   // Add all team members to the contestants list with the teamId
   const newContestantEntries = team.teamMembers.map((member) => ({
     userId: member.user,
+    sessionId: sessionId,
     teamId: team._id,
   }));
 
@@ -372,22 +380,33 @@ exports.individualStanding = catchAsync(async (req, res) => {
 
 // Function to remove team ID from contests
 exports.removeTeamFromContests = catchAsync(async (teamId) => {
-    // Update the contests that have the team ID in the teams list
-    await Contest.updateMany(
-      { 'teams.teamId': teamId },
-      { $pull: { 'teams': { teamId: teamId } } }
-    );
+  // Update the contests that have the team ID in the teams list
+  await Contest.updateMany(
+    { 'teams.teamId': teamId },
+    { $pull: { 'teams': { teamId: teamId } } }
+  );
 
-    // Update the teams that have the contest ID in the contests list
-    await Contest.updateMany(
-      { 'contestants.teamId': teamId },
-      { $pull: { 'contestants': { teamId: teamId } } }
-    );
+  // Update the teams that have the contest ID in the contests list
+  await Contest.updateMany(
+    { 'contestants.teamId': teamId },
+    { $pull: { 'contestants': { teamId: teamId } } }
+  );
 
-    // Remove the team ID from the teamStanding list
-    await Contest.updateMany(
-      { 'teamStanding': teamId },
-      { $pull: { 'teamStanding': teamId } }
-    );
+  // Remove the team ID from the teamStanding list
+  await Contest.updateMany(
+    { 'teamStanding': teamId },
+    { $pull: { 'teamStanding': teamId } }
+  );
 }
 );
+
+
+// Function to remove problem ID from contests
+exports.removeProblemFromContests = catchAsync(async (problemId) => {
+  await Contest.updateMany(
+    { problems: problemId },
+    { $pull: { problems: problemId } }
+  );
+
+  console.log(`Problem with ID ${problemId} removed from contests successfully.`);
+  });
